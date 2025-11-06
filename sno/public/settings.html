@@ -1,0 +1,331 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تنظیمات - SNO Chat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 40px;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(45deg, #007BFF, #00D4FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .settings-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-icon {
+            background: linear-gradient(45deg, #007BFF, #00D4FF);
+            padding: 8px;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .credits-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .credit-box {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .credit-box:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .credit-amount {
+            font-size: 32px;
+            font-weight: 700;
+            color: #00D4FF;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .credit-label {
+            font-size: 14px;
+            color: #b0b0b0;
+            font-weight: 500;
+        }
+
+        .info-section {
+            background: rgba(0, 123, 255, 0.1);
+            border: 1px solid rgba(0, 123, 255, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .info-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #00D4FF;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(45deg, #007BFF, #00D4FF);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+        }
+
+        .refresh-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header {
+                margin-bottom: 30px;
+            }
+
+            .page-title {
+                font-size: 24px;
+            }
+
+            .settings-card {
+                padding: 20px;
+            }
+
+            .credits-info {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .credit-amount {
+                font-size: 28px;
+            }
+        }
+
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/sno/panel" class="back-btn">
+                <i class="fas fa-arrow-right"></i>
+            </a>
+            <div class="page-title">تنظیمات SNO</div>
+        </div>
+
+        <div class="settings-card">
+            <div class="card-title">
+                <div class="card-icon">
+                    <i class="fas fa-coins"></i>
+                </div>
+                اعتبار شما
+            </div>
+
+            <div class="credits-info" id="creditsInfo">
+                <div class="credit-box">
+                    <span class="credit-amount" id="currentCredits">0</span>
+                    <div class="credit-label">اعتبار فعلی</div>
+                </div>
+                <div class="credit-box">
+                    <span class="credit-amount" id="planType">رایگان</span>
+                    <div class="credit-label">نوع پلن</div>
+                </div>
+            </div>
+
+            <button class="refresh-btn" id="refreshBtn">
+                <i class="fas fa-sync-alt"></i>
+                به‌روزرسانی اطلاعات
+            </button>
+
+            <div class="info-section">
+                <div class="info-title">
+                    <i class="fas fa-info-circle"></i>
+                    نحوه استفاده از اعتبار
+                </div>
+                <div class="info-text">
+                    هر پیام که به هوش مصنوعی ارسال می‌کنید، معادل ۱ اعتبار SNO مصرف می‌کند. اعتبار شما به صورت زنده در این صفحه نمایش داده می‌شود و در صورت کمبود اعتبار، امکان ارسال پیام وجود نخواهد داشت.
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <div class="card-title">
+                <div class="card-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                اطلاعات کاربری
+            </div>
+            <div class="info-text">
+                کاربر: <span id="userName">در حال بارگیری...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class SettingsPage {
+            constructor() {
+                this.init();
+            }
+
+            async init() {
+                this.bindEvents();
+                await this.loadUserData();
+                this.startAutoRefresh();
+            }
+
+            bindEvents() {
+                document.getElementById('refreshBtn').addEventListener('click', () => {
+                    this.loadUserData();
+                });
+            }
+
+            async loadUserData() {
+                const refreshBtn = document.getElementById('refreshBtn');
+                const creditsInfo = document.getElementById('creditsInfo');
+                
+                refreshBtn.disabled = true;
+                creditsInfo.classList.add('loading');
+                
+                try {
+                    const response = await fetch('/api/sno/user-credits');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        document.getElementById('currentCredits').textContent = data.credits.sno || 0;
+                        document.getElementById('planType').textContent = 'رایگان';
+                        document.getElementById('userName').textContent = 'کاربر';
+                    }
+                } catch (error) {
+                    console.error('خطا در بارگیری اطلاعات:', error);
+                } finally {
+                    refreshBtn.disabled = false;
+                    creditsInfo.classList.remove('loading');
+                }
+            }
+
+            getPlanTypeName(planType) {
+                const planNames = {
+                    'free': 'رایگان',
+                    'basic': 'پایه',
+                    'premium': 'پریمیوم',
+                    'pro': 'حرفه‌ای'
+                };
+                return planNames[planType] || 'رایگان';
+            }
+
+            startAutoRefresh() {
+                // بروزرسانی خودکار هر 30 ثانیه
+                setInterval(() => {
+                    this.loadUserData();
+                }, 30000);
+            }
+        }
+
+        // شروع صفحه تنظیمات
+        const settingsPage = new SettingsPage();
+    </script>
+</body>
+</html>
