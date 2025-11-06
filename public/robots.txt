@@ -1,0 +1,85 @@
+# Robots.txt for ZA2 AI Website
+# Generated automatically - Last updated: 2025
+
+User-agent: *
+# Allow all bots to access the site content by default
+
+# Block admin and private areas
+Disallow: /panel/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /blog/admin/
+Disallow: /pano/admin/
+Disallow: /sno/admin/
+
+# Block user authentication pages (not valuable for SEO)
+Disallow: /login
+Disallow: /signup
+
+# Block internal search and parameters
+Disallow: /?s=
+Disallow: /search?
+Disallow: /*?*
+
+# Block storage and temporary files
+Disallow: /storage/
+Disallow: /tmp/
+Disallow: /cache/
+
+# Block common technical files
+Disallow: /*.json$
+Disallow: /*.xml$ 
+Allow: /sitemap.xml
+
+# Block duplicate content variations
+Disallow: /*?print=
+Disallow: /*?share=
+
+# Special rules for specific bots
+
+# Allow search engines to access images
+User-agent: Googlebot
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.png$
+Allow: /*.gif$
+Allow: /*.webp$
+Allow: /*.svg$
+
+# Block AI training bots (protect content)
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+# Crawl delay for aggressive bots
+User-agent: SemrushBot
+Crawl-delay: 10
+
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: MJ12bot
+Crawl-delay: 30
+
+# Sitemap location
+Sitemap: https://ai.za2.ir/sitemap.xml

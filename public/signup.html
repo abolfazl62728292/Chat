@@ -1,0 +1,511 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ثبت‌نام</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/Logo.png">
+    <link rel="shortcut icon" type="image/png" href="/Logo.png">
+    
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%23333" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .container {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border: 1px solid #333;
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            z-index: 2;
+            box-shadow: 
+                0 25px 50px rgba(0, 123, 255, 0.15), 
+                0 0 0 1px rgba(0, 123, 255, 0.1),
+                0 0 40px rgba(173, 216, 230, 0.2);
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #007BFF 0%, #0056b3 100%);
+            border-radius: 20px 20px 0 0;
+        }
+
+        .step {
+            display: none;
+        }
+        .step.active {
+            display: block;
+        }
+        h2 {
+            color: #ffffff;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff 0%, #007BFF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #b0b0b0;
+            font-weight: 600;
+        }
+        input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #333;
+            border-radius: 12px;
+            font-size: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            color: #ffffff;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        input:focus {
+            outline: none;
+            border-color: #007BFF;
+            box-shadow: 0 0 15px rgba(0, 123, 255, 0.3);
+            background: rgba(0, 123, 255, 0.1);
+        }
+        input::placeholder {
+            color: #666;
+        }
+        .btn {
+            background: linear-gradient(135deg, #007BFF 0%, #0056b3 100%);
+            color: #ffffff;
+            padding: 1.2rem 2.5rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 6px 25px rgba(0, 123, 255, 0.4);
+            margin-bottom: 1rem;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(0, 123, 255, 0.6);
+        }
+        .btn:disabled {
+            background: linear-gradient(135deg, #666 0%, #555 100%);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        #resendBtn {
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+            box-shadow: 0 6px 25px rgba(108, 117, 125, 0.4);
+        }
+        
+        #resendBtn:hover {
+            box-shadow: 0 12px 35px rgba(108, 117, 125, 0.6);
+        }
+        
+        .message {
+            margin: 1rem 0;
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 500;
+        }
+        .message.success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: #ffffff;
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+        }
+        .message.error {
+            background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
+            color: #ffffff;
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+        }
+        .password-requirements {
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            color: #888;
+        }
+        .requirement {
+            margin: 0.2rem 0;
+            transition: all 0.3s ease;
+        }
+        .requirement.met {
+            color: #28a745;
+        }
+        .requirement.not-met {
+            color: #dc3545;
+        }
+        .countdown {
+            font-size: 0.9rem;
+            color: #007BFF;
+            margin-top: 0.5rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px;
+                padding: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Step 1: Phone Number -->
+        <div class="step active" id="step1">
+            <h2>وارد کردن شماره تلفن</h2>
+            <form id="phoneForm">
+                <div class="form-group">
+                    <label for="phone">شماره تلفن همراه:</label>
+                    <input type="tel" id="phone" name="phone" placeholder="09123456789" required>
+                </div>
+                <button type="submit" class="btn" id="sendCodeBtn">ارسال کد تایید</button>
+            </form>
+            <div id="phoneMessage" class="message" style="display: none;"></div>
+        </div>
+
+        <!-- Step 2: Verification Code -->
+        <div class="step" id="step2">
+            <h2>تایید شماره تلفن</h2>
+            <form id="verifyForm">
+                <div class="form-group">
+                    <label for="code">کد ۴ رقمی ارسال شده:</label>
+                    <input type="text" id="code" name="code" maxlength="4" placeholder="1234" required>
+                </div>
+                <button type="submit" class="btn" id="verifyBtn">تایید کد</button>
+                <button type="button" class="btn" id="resendBtn">ارسال مجدد کد</button>
+            </form>
+            <div id="verifyMessage" class="message" style="display: none;"></div>
+            <div id="countdown" class="countdown" style="display: none;"></div>
+        </div>
+
+        <!-- Step 3: Username and Password -->
+        <div class="step" id="step3">
+            <h2>تعیین نام کاربری و رمز عبور</h2>
+            <form id="completeForm">
+                <div class="form-group">
+                    <label for="username">نام کاربری:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">رمز عبور:</label>
+                    <input type="password" id="password" name="password" required>
+                    <div class="password-requirements">
+                        <div class="requirement" id="req-upper">✓ حداقل یک حرف بزرگ انگلیسی</div>
+                        <div class="requirement" id="req-lower">✓ حداقل یک حرف کوچک انگلیسی</div>
+                        <div class="requirement" id="req-numbers">✓ حداقل ۴ عدد</div>
+                        <div class="requirement" id="req-special">✓ حداقل یک علامت</div>
+                        <div class="requirement" id="req-length">✓ حداقل ۸ کاراکتر</div>
+                    </div>
+                </div>
+                <button type="submit" class="btn" id="completeBtn">تکمیل ثبت‌نام</button>
+            </form>
+            <div id="completeMessage" class="message" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentPhone = '';
+        let countdownInterval = null;
+
+        // Phone form submission
+        document.getElementById('phoneForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const phone = document.getElementById('phone').value;
+            const sendCodeBtn = document.getElementById('sendCodeBtn');
+            const phoneMessage = document.getElementById('phoneMessage');
+
+            sendCodeBtn.disabled = true;
+            sendCodeBtn.textContent = 'در حال ارسال...';
+
+            try {
+                const response = await fetch('/api/send-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('phoneMessage', data.message, 'success');
+                    currentPhone = data.phone;
+                    showStep(2);
+                } else {
+                    showMessage('phoneMessage', data.message, 'error');
+                    if (data.remainingTime) {
+                        startCountdown('phoneMessage', data.remainingTime);
+                    }
+                    if (data.redirectTo) {
+                        setTimeout(() => {
+                            window.location.href = data.redirectTo;
+                        }, 3000);
+                    }
+                }
+            } catch (error) {
+                showMessage('phoneMessage', 'خطای ارتباط با سرور', 'error');
+            }
+
+            sendCodeBtn.disabled = false;
+            sendCodeBtn.textContent = 'ارسال کد تایید';
+        });
+
+        // Verify form submission
+        document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const code = document.getElementById('code').value;
+            const verifyBtn = document.getElementById('verifyBtn');
+
+            verifyBtn.disabled = true;
+            verifyBtn.textContent = 'در حال تایید...';
+
+            try {
+                const response = await fetch('/api/verify-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: currentPhone, code })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('verifyMessage', data.message, 'success');
+                    setTimeout(() => {
+                        showStep(3);
+                    }, 1500);
+                } else {
+                    showMessage('verifyMessage', data.message, 'error');
+                    document.getElementById('code').value = '';
+                    if (data.remainingTime) {
+                        startCountdown('verifyMessage', data.remainingTime);
+                    }
+                }
+            } catch (error) {
+                showMessage('verifyMessage', 'خطای ارتباط با سرور', 'error');
+            }
+
+            verifyBtn.disabled = false;
+            verifyBtn.textContent = 'تایید کد';
+        });
+
+        // Resend code
+        document.getElementById('resendBtn').addEventListener('click', async () => {
+            const resendBtn = document.getElementById('resendBtn');
+            resendBtn.disabled = true;
+            resendBtn.textContent = 'در حال ارسال...';
+
+            try {
+                const response = await fetch('/api/send-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: currentPhone })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('verifyMessage', 'کد جدید ارسال شد', 'success');
+                } else {
+                    showMessage('verifyMessage', data.message, 'error');
+                    if (data.remainingTime) {
+                        startCountdown('verifyMessage', data.remainingTime);
+                    }
+                }
+            } catch (error) {
+                showMessage('verifyMessage', 'خطای ارتباط با سرور', 'error');
+            }
+
+            resendBtn.disabled = false;
+            resendBtn.textContent = 'ارسال مجدد کد';
+        });
+
+        // Complete form submission
+        document.getElementById('completeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const usernameInput = document.getElementById('username');
+            const password = document.getElementById('password').value;
+            const completeBtn = document.getElementById('completeBtn');
+
+            const username = usernameInput.value;
+
+            if (!validateUsername(username)) {
+                showMessage('completeMessage', 'نام کاربری نامعتبر است. (حداقل ۳ حرف، حداکثر ۲۰ حرف، شامل حروف انگلیسی، اعداد و زیرخط. نام‌های رزرو شده مجاز نیستند.)', 'error');
+                return;
+            }
+
+            if (!validatePassword(password)) {
+                showMessage('completeMessage', 'رمز عبور الزامات را برآورده نمی‌کند', 'error');
+                return;
+            }
+
+            completeBtn.disabled = true;
+            completeBtn.textContent = 'در حال تکمیل...';
+
+            try {
+                const response = await fetch('/api/complete-signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: currentPhone, username, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('completeMessage', data.message, 'success');
+                    setTimeout(() => {
+                        window.location.href = data.redirectTo;
+                    }, 2000);
+                } else {
+                    showMessage('completeMessage', data.message, 'error');
+                }
+            } catch (error) {
+                showMessage('completeMessage', 'خطای ارتباط با سرور', 'error');
+            }
+
+            completeBtn.disabled = false;
+            completeBtn.textContent = 'تکمیل ثبت‌نام';
+        });
+
+        // Username input validation
+        document.getElementById('username').addEventListener('input', (e) => {
+            const username = e.target.value;
+            if (username.length > 0 && !validateUsername(username)) {
+                showMessage('completeMessage', 'نام کاربری نامعتبر است. (حداقل ۳ حرف، حداکثر ۲۰ حرف، شامل حروف انگلیسی، اعداد و زیرخط. نام‌های رزرو شده مجاز نیستند.)', 'error');
+            } else {
+                document.getElementById('completeMessage').style.display = 'none';
+            }
+        });
+
+        // Username validation function
+        function validateUsername(username) {
+            const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
+            const reservedUsernames = ['admin', 'root', 'user', 'guest', 'test', 'api', 'www', 'mail', 'ftp'];
+
+            if (!usernameRegex.test(username)) {
+                return false;
+            }
+
+            if (reservedUsernames.includes(username.toLowerCase())) {
+                return false;
+            }
+
+            return true;
+        }
+
+        // Password validation function
+        function validatePassword(password) {
+            const hasUpperCase = /[A-Z]/.test(password);
+            const hasLowerCase = /[a-z]/.test(password);
+            const hasNumbers = /\d{4,}/.test(password);
+            const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+            const minLength = password.length >= 8;
+
+            return hasUpperCase && hasLowerCase && hasNumbers && hasSpecialChar && minLength;
+        }
+
+        function showStep(stepNumber) {
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active');
+            });
+            document.getElementById(`step${stepNumber}`).classList.add('active');
+        }
+
+        function showMessage(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `message ${type}`;
+            element.style.display = 'block';
+        }
+
+        function startCountdown(messageElementId, seconds) {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+
+            const countdownElement = document.getElementById('countdown');
+            let remaining = seconds;
+
+            countdownInterval = setInterval(() => {
+                const minutes = Math.floor(remaining / 60);
+                const secs = remaining % 60;
+                countdownElement.textContent = `زمان باقی‌مانده: ${minutes}:${secs.toString().padStart(2, '0')}`;
+                countdownElement.style.display = 'block';
+
+                remaining--;
+
+                if (remaining < 0) {
+                    clearInterval(countdownInterval);
+                    countdownElement.style.display = 'none';
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
