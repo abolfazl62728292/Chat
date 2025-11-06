@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">دسته‌بندی - ZaTwo AI Blog</title>
+    <meta name="description" id="pageDescription" content="مقالات دسته‌بندی شده در بلاگ زاتو ای آی">
+    <meta name="keywords" id="pageKeywords" content="هوش مصنوعی, AI, دسته‌بندی, مقالات">
+    <link rel="canonical" id="canonicalUrl" href="">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/Logo.png">
+    <link rel="shortcut icon" type="image/png" href="/Logo.png">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" id="ogTitle" content="دسته‌بندی - ZaTwo AI Blog" />
+    <meta property="og:description" id="ogDescription" content="مقالات دسته‌بندی شده در بلاگ زاتو ای آی" />
+    <meta property="og:image" content="/Logo.png" />
+    <meta property="og:url" id="ogUrl" content="">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" id="twitterTitle" content="دسته‌بندی - ZaTwo AI Blog" />
+    <meta name="twitter:description" id="twitterDescription" content="مقالات دسته‌بندی شده در بلاگ زاتو ای آی" />
+
+    <link rel="stylesheet" href="/blog/public/blog-category.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-content">
+            <a href="/blog" class="logo">ZaTwo AI Blog</a>
+            <div class="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="/">صفحه اصلی</a></li>
+                <li><a href="/blog">بلاگ</a></li>
+                <li><a href="/sno">اسنو‌ چت</a></li>
+                <li><a href="/pano">پانو (ساخت عکس ۳۶۰ درجه)</a></li>
+                
+            </ul>
+        </div>
+    </nav>
+    
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <h1 class="category-title" id="categoryTitle">دسته‌بندی</h1>
+            <p class="category-description" id="categoryDescription">مشاهده مقالات این دسته‌بندی</p>
+            <div class="category-stats" id="categoryStats">در حال بارگیری...</div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="/blog">بلاگ</a>
+            <span>←</span>
+            <span id="breadcrumbCategory">دسته‌بندی</span>
+        </div>
+        
+        <!-- Posts Grid -->
+        <div id="postsContainer">
+            <div class="loading">
+                <div class="loading-dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+                <p>در حال بارگیری مقالات...</p>
+            </div>
+        </div>
+        
+        <!-- Pagination -->
+        <div id="paginationContainer"></div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <h3>ZaTwo AI</h3>
+            <p>پلتفرم هوش مصنوعی برای خلاقیت و نوآوری</p>
+
+            <div class="footer-links">
+                <a href="https://za2.ir">استارت اپ زاتو(ZaTwo)</a>
+                <a href="/">صفحه اصلی</a>
+                <a href="/blog">بلاگ</a>
+                <a href="/sno">اسنو چت</a>
+                <a href="/pano">پانو</a>
+
+            <p style="margin-top: 2rem; opacity: 0.8;">
+                © 2025 ZaTwo AI. تمامی حقوق محفوظ است.
+            </p>
+        </div>
+    </footer>
+
+    <script src="/blog/public/blog-category.js"></script>
+</body>
+</html>

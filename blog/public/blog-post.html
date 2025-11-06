@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Preload critical resources for Core Web Vitals optimization -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" as="style">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+
+    <!-- SEO Meta Tags -->
+    <title id="pageTitle">مقاله - بلاگ ZaTwo AI</title>
+    <meta name="description" id="pageDescription" content="مطالعه مقالات هوش مصنوعی در بلاگ زاتو ای آی (ZaTwo AI)">
+    <meta name="keywords" id="pageKeywords" content="هوش مصنوعی, AI, مقاله, آموزش">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="author" content="ZaTwo AI">
+    <link rel="canonical" id="canonicalUrl" href="">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/Logo.png">
+    <link rel="shortcut icon" type="image/png" href="/Logo.png">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:locale" content="fa_IR">
+    <meta property="og:type" content="article">
+    <meta property="og:title" id="ogTitle" content="">
+    <meta property="og:description" id="ogDescription" content="">
+    <meta property="og:image" id="ogImage" content="/Logo.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" id="ogUrl" content="">
+    <meta property="og:site_name" content="بلاگ ZaTwo AI">
+    <meta property="article:author" id="articleAuthor" content="">
+    <meta property="article:published_time" id="articlePublished" content="">
+    <meta property="article:modified_time" id="articleModified" content="">
+    <meta property="article:section" id="articleSection" content="">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" id="twitterTitle" content="">
+    <meta name="twitter:description" id="twitterDescription" content="">
+    <meta name="twitter:image" id="twitterImage" content="">
+    
+
+    <!-- Critical CSS inline for LCP optimization -->
+    <style>
+        body{font-family:'Vazirmatn',-apple-system,BlinkMacSystemFont,'Tahoma',Arial,sans-serif;margin:0;padding:0;background:#000;color:#e5e5e5}
+        .loading{text-align:center;padding:3rem;color:#b0b0b0}
+        .header{background:linear-gradient(135deg,#000 0%,#1a1a2e 100%);position:sticky;top:0;z-index:1000}
+    </style>
+
+    <!-- Load Prism CSS with preload -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+
+    <!-- Structured Data placeholder - will be populated by JavaScript -->
+    <script type="application/ld+json" id="blogPostSchema">{}</script>
+
+    <!-- Defer non-critical scripts for INP optimization -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+    <link rel="stylesheet" href="/blog/assets/blog-post.css"> 
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <a href="/blog" class="logo-text">ZaTwo AI Blog</a>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="/" class="nav-link">خانه</a></li>
+                    <li><a href="/blog" class="nav-link">بلاگ</a></li>
+                    <li><a href="/sno" class="nav-link">اسنو چت</a></li>
+                    <li><a href="/pano" class="nav-link">پانو(ساخت عکس ۳۶۰ درجه)</a></li>
+                    
+                </ul>
+                <button class="menu-toggle" id="menuToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Mobile Drawer -->
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <div class="mobile-drawer" id="mobileDrawer">
+        <div class="drawer-header">
+            <a href="/blog" class="logo-text">ZaTwo AI Blog</a>
+            <button class="drawer-close" id="drawerClose">✕</button>
+        </div>
+        <ul class="drawer-menu">
+            <li><a href="/" class="nav-link">خانه</a></li>
+            <li><a href="/blog" class="nav-link">بلاگ</a></li>
+            <li><a href="/sno" class="nav-link">اسنو چت</a></li>
+            <li><a href="/pano" class="nav-link">پانو</a></li>
+            
+        </ul>
+    </div>
+
+    <div class="container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb" id="breadcrumb">
+            <a href="/blog">بلاگ</a>
+        </div>
+
+        <!-- Post Content -->
+        <div id="postContainer">
+            <div class="loading">
+                <div class="loading-dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+                <p>در حال بارگیری مقاله...</p>
+            </div>
+        </div>
+
+        <!-- Related Posts -->
+        <div id="relatedPostsContainer"></div>
+    </div>
+
+    <script src="/blog/assets/blog-post.js"></script>
+</body>
+</html>

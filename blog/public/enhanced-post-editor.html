@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ویرایشگر پیشرفته مقاله - بلاگ ZaTwo AI</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tahoma', Arial, sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #007BFF 0%, #0056b3 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            color: #2c3e50;
+        }
+
+        .save-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .editor-form {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .form-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #007BFF;
+            padding-bottom: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e9ecef;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #007BFF;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* Enhanced Content Builder */
+        .content-builder {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .builder-toolbar {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-btn {
+            padding: 0.5rem 1rem;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .toolbar-btn:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .content-blocks {
+            min-height: 400px;
+            padding: 1rem;
+        }
+
+        .content-block {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .content-block:hover {
+            border-color: #007BFF;
+            box-shadow: 0 4px 12px rgba(0,123,255,0.15);
+        }
+
+        .block-controls {
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .control-btn {
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .move-up {
+            background: #28a745;
+            color: white;
+        }
+
+        .move-down {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .delete-block {
+            background: #dc3545;
+            color: white;
+        }
+
+        .text-block textarea {
+            width: 100%;
+            min-height: 120px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 1rem;
+            font-size: 1rem;
+            resize: vertical;
+        }
+
+        .image-block {
+            text-align: center;
+        }
+
+        .image-upload-area {
+            border: 2px dashed #007BFF;
+            border-radius: 8px;
+            padding: 2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+
+        .image-upload-area:hover {
+            background: #e7f1ff;
+        }
+
+        .uploaded-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .image-info {
+            margin-top: 1rem;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .preview-section {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .preview-content {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 2rem;
+            min-height: 300px;
+            background: #fff;
+        }
+
+        .preview-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .message {
+            padding: 1rem 1.5rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Related Posts Styles */
+        .related-posts-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .related-posts-tabs {
+            display: flex;
+            background: #e9ecef;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: #007BFF;
+            color: white;
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: #dee2e6;
+        }
+
+        .related-posts-content {
+            padding: 2rem;
+        }
+
+        .related-tab-content {
+            display: none;
+        }
+
+        .related-tab-content.active {
+            display: block;
+        }
+
+        .posts-selector h4 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .posts-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .post-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .post-item:hover {
+            background: #f8f9fa;
+        }
+
+        .post-item.selected {
+            background: #e7f1ff;
+            border-color: #007BFF;
+        }
+
+        .post-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-left: 1rem;
+        }
+
+        .post-item-placeholder {
+            width: 60px;
+            height: 60px;
+            background: #ddd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            margin-left: 1rem;
+        }
+
+        .post-item-content {
+            flex: 1;
+        }
+
+        .post-item-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .post-item-meta {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .selected-posts {
+            margin-top: 2rem;
+        }
+
+        .selected-posts h5 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .selected-posts-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .selected-post-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.8rem;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .selected-post-info {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+
+        .selected-post-info img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-left: 0.8rem;
+        }
+
+        .selected-post-placeholder {
+            width: 40px;
+            height: 40px;
+            background: #ddd;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            margin-left: 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        .selected-post-title {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .remove-selected-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0.4rem 0.8rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .remove-selected-btn:hover {
+            background: #c82333;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .builder-toolbar {
+                justify-content: center;
+            }
+
+            .save-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #007BFF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div> ویرایشگر پیشرفته مقاله</div>
+            <div class="nav-links">
+                <a href="/blog/admin">پنل اصلی</a>
+                <a href="/blog/admin/posts">مقالات</a>
+                <a href="/blog/admin/categories">دسته‌بندی‌ها</a>
+                <a href="/blog">مشاهده بلاگ</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="editor-header">
+            <h1 class="page-title" id="pageTitle">مقاله جدید</h1>
+            <div class="save-buttons">
+                <button class="btn btn-secondary" onclick="saveDraft()" id="draftBtn">💾 ذخیره پیش‌نویس</button>
+                <button class="btn btn-success" onclick="publishPost()" id="publishBtn">📢 انتشار</button>
+                <a href="/blog/admin/posts" class="btn btn-warning">↩️ بازگشت</a>
+            </div>
+        </div>
+
+        <div id="messageContainer"></div>
+
+        <form id="postForm" class="editor-form">
+            <input type="hidden" id="postId" name="id">
+
+            <!-- اطلاعات اصلی مقاله -->
+            <div class="form-section">
+                <h3 class="section-title">اطلاعات اصلی</h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="postTitle">عنوان مقاله:</label>
+                        <input type="text" class="form-control" id="postTitle" name="title" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="postSlug">آدرس (Slug):</label>
+                        <input type="text" class="form-control" id="postSlug" name="slug" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="postCategory">دسته‌بندی:</label>
+                        <select class="form-control" id="postCategory" name="category_id" required>
+                            <option value="">انتخاب دسته‌بندی...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="postExcerpt">خلاصه:</label>
+                        <input type="text" class="form-control" id="postExcerpt" name="excerpt" placeholder="خلاصه کوتاه از مقاله...">
+                    </div>
+                </div>
+            </div>
+
+            <!-- سازنده محتوا -->
+            <div class="form-section">
+                <h3 class="section-title">محتوای مقاله</h3>
+
+                <div class="content-builder">
+                    <div class="builder-toolbar">
+                        <button type="button" class="toolbar-btn" onclick="addTextBlock()">➕ اضافه کردن متن</button>
+                        <button type="button" class="toolbar-btn" onclick="addImageBlock()">🖼️ اضافه کردن عکس</button>
+                        <button type="button" class="toolbar-btn" onclick="generatePreview()">👁️ پیش‌نمایش</button>
+                        <button type="button" class="toolbar-btn" onclick="clearAll()">🗑️ پاک کردن همه</button>
+                    </div>
+
+                    <div class="content-blocks" id="contentBlocks">
+                        <div class="content-block text-block" data-type="text" data-id="1">
+                            <div class="block-controls">
+                                <button type="button" class="control-btn move-up" onclick="moveBlockUp(this)" title="انتقال به بالا">↑</button>
+                                <button type="button" class="control-btn move-down" onclick="moveBlockDown(this)" title="انتقال به پایین">↓</button>
+                                <button type="button" class="control-btn delete-block" onclick="deleteBlock(this)" title="حذف">✕</button>
+                            </div>
+                            <textarea placeholder="محتوای متنی خود را اینجا بنویسید..." onchange="updatePreview()"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- پیش‌نمایش -->
+            <div class="form-section">
+                <h3 class="section-title">پیش‌نمایش نهایی</h3>
+                <div class="preview-section">
+                    <div class="preview-content" id="finalPreview">
+                        <p style="color: #666; text-align: center;">پیش‌نمایش محتوا اینجا نمایش داده می‌شود...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- مقالات مرتبط -->
+            <div class="form-section">
+                <h3 class="section-title">مقالات مرتبط</h3>
+
+                <div class="related-posts-section">
+                    <div class="related-posts-tabs">
+                        <button type="button" class="tab-btn active" onclick="switchRelatedTab('readMore')" id="readMoreTab">
+                            📖 بیشتر بخوانید
+                        </button>
+                        <button type="button" class="tab-btn" onclick="switchRelatedTab('related')" id="relatedTab">
+                            🔗 موارد مرتبط
+                        </button>
+                    </div>
+
+                    <div class="related-posts-content">
+                        <!-- بخش بیشتر بخوانید -->
+                        <div class="related-tab-content active" id="readMoreContent">
+                            <div class="posts-selector">
+                                <h4>انتخاب مقالات برای بخش "بیشتر بخوانید":</h4>
+                                <input type="text" id="readMoreSearch" class="form-control" placeholder="جستجو در مقالات..." onkeyup="searchPosts('readMore')">
+                                <div class="posts-list" id="readMorePostsList">
+                                    <!-- Posts will be loaded here -->
+                                </div>
+                                <div class="selected-posts">
+                                    <h5>مقالات انتخاب شده:</h5>
+                                    <div class="selected-posts-container" id="readMoreSelected">
+                                        <!-- Selected posts will appear here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- بخش موارد مرتبط -->
+                        <div class="related-tab-content" id="relatedContent">
+                            <div class="posts-selector">
+                                <h4>انتخاب مقالات برای بخش "موارد مرتبط":</h4>
+                                <input type="text" id="relatedSearch" class="form-control" placeholder="جستجو در مقالات..." onkeyup="searchPosts('related')">
+                                <div class="posts-list" id="relatedPostsList">
+                                    <!-- Posts will be loaded here -->
+                                </div>
+                                <div class="selected-posts">
+                                    <h5>مقالات انتخاب شده:</h5>
+                                    <div class="selected-posts-container" id="relatedSelected">
+                                        <!-- Selected posts will appear here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEO و متاداده -->
+            <div class="form-section">
+                <h3 class="section-title">تنظیمات SEO</h3>
+
+                <div class="form-group">
+                    <label class="form-label" for="metaDescription">توضیحات متا:</label>
+                    <textarea class="form-control" id="metaDescription" name="meta_description" rows="3" maxlength="160"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="metaKeywords">کلمات کلیدی:</label>
+                    <input type="text" class="form-control" id="metaKeywords" name="meta_keywords">
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let currentPostId = null;
+        let categories = [];
+        let blockCounter = 1;
+        let uploadedFiles = new Map(); // Track uploaded files
+        let allPosts = []; // All available posts for selection
+        let selectedRelatedPosts = {
+            readMore: [],
+            related: []
+        };
+
+        // شناسایی حالت ویرایش از URL
+        const urlPath = window.location.pathname;
+        const isEditMode = urlPath.includes('/edit/');
+        if (isEditMode) {
+            currentPostId = urlPath.split('/').pop();
+        }
+
+        // بارگیری داده‌ها
+        async function loadData() {
+            try {
+                // بارگیری دسته‌بندی‌ها
+                const categoriesResponse = await fetch('/api/blog/admin/categories');
+                const categoriesData = await categoriesResponse.json();
+
+                if (categoriesData.success) {
+                    categories = categoriesData.categories || [];
+                    populateCategories();
+                }
+
+                // Load all posts for related posts selection
+                await loadAllPosts();
+
+                // اگر حالت ویرایش است، مقاله را بارگیری کن
+                if (isEditMode && currentPostId) {
+                    await loadPost(currentPostId);
+                    await loadRelatedPosts(currentPostId);
+                } else {
+                    // Add initial text block for new posts
+                    addTextBlock();
+                }
+
+            } catch (error) {
+                console.error('خطا در بارگیری داده‌ها:', error);
+                showMessage('خطا در بارگیری داده‌ها', 'error');
+            }
+        }
+
+        function populateCategories() {
+            const select = document.getElementById('postCategory');
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.id;
+                option.textContent = category.name;
+                select.appendChild(option);
+            });
+        }
+
+        async function loadPost(postId) {
+            try {
+                const response = await fetch(`/api/blog/admin/posts/${postId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const post = data.post;
+                    document.getElementById('pageTitle').textContent = 'ویرایش: ' + post.title;
+                    document.getElementById('postId').value = post.id;
+                    document.getElementById('postTitle').value = post.title;
+                    document.getElementById('postSlug').value = post.slug;
+                    document.getElementById('postCategory').value = post.category_id;
+                    document.getElementById('postExcerpt').value = post.excerpt || '';
+                    document.getElementById('metaDescription').value = post.meta_description || '';
+                    document.getElementById('metaKeywords').value = post.meta_keywords || '';
+
+                    // Parse content and images to reconstruct blocks
+                    parseContentToBlocks(post.content, post.images || []);
+
+                } else {
+                    showMessage('خطا در بارگیری مقاله', 'error');
+                }
+            } catch (error) {
+                console.error('خطا در بارگیری مقاله:', error);
+                showMessage('خطا در بارگیری مقاله', 'error');
+            }
+        }
+
+        function parseContentToBlocks(content, images) {
+            const container = document.getElementById('contentBlocks');
+            container.innerHTML = '';
+            blockCounter = 0;
+
+            // Filter out placeholder images and sort by position
+            const realImages = images.filter(img => {
+                return !(img.filename.startsWith('panorama_') && img.filename.match(/^panorama_\d+\.(jpg|jpeg|png|gif|webp)$/));
+            }).sort((a, b) => (a.position || 0) - (b.position || 0));
+
+            // Split content by image placeholders while preserving order
+            let remainingContent = content;
+            let currentPosition = 0;
+
+            // Find all image placeholders with their positions
+            const imageMatches = [];
+            let match;
+            const imageRegex = /\[IMAGE:([^\]]+)\]/g;
+
+            while ((match = imageRegex.exec(content)) !== null) {
+                const filename = match[1];
+
+                // Skip placeholder images
+                if (filename.startsWith('panorama_') && filename.match(/^panorama_\d+\.(jpg|jpeg|png|gif|webp)$/)) {
+                    console.log(`Skipping placeholder image: ${filename}`);
+                    continue;
+                }
+
+                const image = realImages.find(img => img.filename === filename);
+                if (image) {
+                    imageMatches.push({
+                        start: match.index,
+                        end: match.index + match[0].length,
+                        image: image,
+                        placeholder: match[0]
+                    });
+                }
+            }
+
+            // Sort matches by position in content
+            imageMatches.sort((a, b) => a.start - b.start);
+
+            let lastEnd = 0;
+
+            // Process content with proper ordering
+            imageMatches.forEach(imageMatch => {
+                // Add text before image if any
+                if (imageMatch.start > lastEnd) {
+                    const textContent = content.slice(lastEnd, imageMatch.start).trim();
+                    if (textContent) {
+                        addTextBlockWithData(textContent);
+                    }
+                }
+
+                // Add image block
+                addImageBlockWithData(imageMatch.image);
+                lastEnd = imageMatch.end;
+            });
+
+            // Add remaining text after last image
+            if (lastEnd < content.length) {
+                const textContent = content.slice(lastEnd).trim();
+                if (textContent) {
+                    addTextBlockWithData(textContent);
+                }
+            }
+
+            // If no content was added, add a default text block
+            if (container.children.length === 0) {
+                addTextBlock();
+            }
+
+            updatePreview();
+        }
+
+        function addTextBlock() {
+            const container = document.getElementById('contentBlocks');
+            const blockId = ++blockCounter;
+
+            const block = document.createElement('div');
+            block.className = 'content-block text-block';
+            block.setAttribute('data-type', 'text');
+            block.setAttribute('data-id', blockId);
+
+            block.innerHTML = `
+                <div class="block-controls">
+                    <button type="button" class="control-btn move-up" onclick="moveBlockUp(this)" title="انتقال به بالا">↑</button>
+                    <button type="button" class="control-btn move-down" onclick="moveBlockDown(this)" title="انتقال به پایین">↓</button>
+                    <button type="button" class="control-btn delete-block" onclick="deleteBlock(this)" title="حذف">✕</button>
+                </div>
+                <textarea placeholder="محتوای متنی خود را اینجا بنویسید..." oninput="updatePreview()"></textarea>
+            `;
+
+            container.appendChild(block);
+            const textarea = block.querySelector('textarea');
+            if (textarea) {
+                textarea.focus();
+            }
+            updatePreview();
+        }
+
+        function addTextBlockWithData(content) {
+            const container = document.getElementById('contentBlocks');
+            const blockId = ++blockCounter;
+
+            const block = document.createElement('div');
+            block.className = 'content-block text-block';
+            block.setAttribute('data-type', 'text');
+            block.setAttribute('data-id', blockId);
+
+            block.innerHTML = `
+                <div class="block-controls">
+                    <button type="button" class="control-btn move-up" onclick="moveBlockUp(this)" title="انتقال به بالا">↑</button>
+                    <button type="button" class="control-btn move-down" onclick="moveBlockDown(this)" title="انتقال به پایین">↓</button>
+                    <button type="button" class="control-btn delete-block" onclick="deleteBlock(this)" title="حذف">✕</button>
+                </div>
+                <textarea placeholder="محتوای متنی خود را اینجا بنویسید..." oninput="updatePreview()">${content}</textarea>
+            `;
+
+            container.appendChild(block);
+        }
+
+        function addImageBlock() {
+            const container = document.getElementById('contentBlocks');
+            const blockId = ++blockCounter;
+
+            const block = document.createElement('div');
+            block.className = 'content-block image-block';
+            block.setAttribute('data-type', 'image');
+            block.setAttribute('data-id', blockId);
+
+            block.innerHTML = `
+                <div class="block-controls">
+                    <button type="button" class="control-btn move-up" onclick="moveBlockUp(this)" title="انتقال به بالا">↑</button>
+                    <button type="button" class="control-btn move-down" onclick="moveBlockDown(this)" title="انتقال به پایین">↓</button>
+                    <button type="button" class="control-btn delete-block" onclick="deleteBlock(this)" title="حذف">✕</button>
+                </div>
+                <div class="image-upload-area">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📷</div>
+                    <p>انتخاب عکس:</p>
+                    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+                        <button type="button" class="btn btn-success" onclick="selectImage(this.closest('.image-upload-area'))" style="padding: 8px 15px; font-size: 0.9rem;">📷 انتخاب عادی</button>
+                        <button type="button" class="btn btn-warning" onclick="selectImageWithCustomName(this.closest('.image-upload-area'))" style="padding: 8px 15px; font-size: 0.9rem;">✏️ انتخاب با نام دلخواه</button>
+                    </div>
+                    <input type="file" accept="image/*" style="display: none;" onchange="handleImageUpload(this)">
+                </div>
+            `;
+
+            container.appendChild(block);
+        }
+
+        function addImageBlockWithData(imageData) {
+            const container = document.getElementById('contentBlocks');
+            const blockId = ++blockCounter;
+
+            const block = document.createElement('div');
+            block.className = 'content-block image-block';
+            block.setAttribute('data-type', 'image');
+            block.setAttribute('data-id', blockId);
+            block.setAttribute('data-filename', imageData.filename);
+
+            block.innerHTML = `
+                <div class="block-controls">
+                    <button type="button" class="control-btn move-up" onclick="moveBlockUp(this)" title="انتقال به بالا">↑</button>
+                    <button type="button" class="control-btn move-down" onclick="moveBlockDown(this)" title="انتقال به پایین">↓</button>
+                    <button type="button" class="control-btn delete-block" onclick="deleteBlock(this)" title="حذف">✕</button>
+                </div>
+                <img src="/api/blog/images/${imageData.filename}" alt="${imageData.original_name}" class="uploaded-image">
+                <div class="image-info">
+                    <strong>فایل:</strong> ${imageData.filename}<br>
+                    <button type="button" class="btn btn-success" onclick="renameImage(this)">✏️ تغییر نام</button>
+                    <button type="button" class="btn btn-warning" onclick="changeImage(this)">🔄 تغییر عکس</button>
+                </div>
+                <input type="file" accept="image/*" style="display: none;" onchange="handleImageUpload(this)">
+            `;
+
+            container.appendChild(block);
+        }
+
+        function selectImage(uploadArea) {
+            const input = uploadArea.querySelector('input[type="file"]');
+            input.click();
+        }
+
+        function selectImageWithCustomName(uploadArea) {
+            const input = uploadArea.querySelector('input[type="file"]');
+            const originalName = prompt('نام دلخواه برای عکس (بدون پسوند):');
+            if (originalName && originalName.trim()) {
+                // Store custom name temporarily or associate it in a way that handleImageUpload can use it
+                // For simplicity, let's just use it directly in the upload process if possible,
+                // or store it in a data attribute on the uploadArea.
+                uploadArea.setAttribute('data-custom-name', originalName.trim());
+                input.click();
+            }
+        }
+
+        function changeImage(button) {
+            const block = button.closest('.image-block');
+            const input = block.querySelector('input[type="file"]');
+            input.click();
+        }
+
+        async function renameImage(button) {
+            const block = button.closest('.image-block');
+            const currentFilename = block.getAttribute('data-filename');
+
+            if (!currentFilename) {
+                showMessage('خطا: نام فایل فعلی یافت نشد', 'error');
+                return;
+            }
+
+            const currentNameWithoutExt = currentFilename.replace(/\.[^/.]+$/, "");
+            const newName = prompt('نام جدید برای فایل (بدون پسوند):', currentNameWithoutExt);
+
+            if (!newName || !newName.trim() || newName.trim() === currentNameWithoutExt) {
+                return;
+            }
+
+            try {
+                showMessage('در حال تغییر نام و بهینه‌سازی...', 'success');
+
+                const response = await fetch(`/api/blog/admin/images/${currentFilename}/rename`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ newName: newName.trim() })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Update the block with new filename
+                    block.setAttribute('data-filename', data.newFilename);
+
+                    // Update the image src
+                    const img = block.querySelector('img');
+                    if (img) {
+                        img.src = data.url;
+                    }
+
+                    // Update the filename display in info
+                    const imageInfo = block.querySelector('.image-info');
+                    if (imageInfo) {
+                        const filenameText = imageInfo.querySelector('strong') ? 
+                            imageInfo.querySelector('strong').nextSibling : 
+                            imageInfo.firstChild;
+
+                        if (filenameText) {
+                            imageInfo.innerHTML = `<strong>فایل:</strong> ${data.newFilename}<br>
+                                <button type="button" class="btn btn-success" onclick="renameImage(this)">✏️ تغییر نام</button>
+                                <button type="button" class="btn btn-warning" onclick="changeImage(this)">🔄 تغییر عکس</button>`;
+                        }
+                    }
+
+                    updatePreview();
+
+                    const message = data.optimized ? 
+                        'نام فایل تغییر یافت و فایل بهینه‌سازی شد' : 
+                        'نام فایل تغییر یافت';
+                    showMessage(message, 'success');
+                } else {
+                    showMessage(data.message || 'خطا در تغییر نام فایل', 'error');
+                }
+            } catch (error) {
+                console.error('خطا در تغییر نام فایل:', error);
+                showMessage('خطا در تغییر نام فایل', 'error');
+            }
+        }
+
+        async function handleImageUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const block = input.closest('.image-block');
+            const formData = new FormData();
+            formData.append('image', file);
+
+            // Check if custom name was provided
+            const customName = block.getAttribute('data-custom-name');
+            if (customName) {
+                formData.append('custom_name', customName);
+                block.removeAttribute('data-custom-name'); // Clear the attribute after use
+            }
+
+            try {
+                const uploadAreaOrImageContainer = block.querySelector('.image-upload-area') || block.querySelector('.uploaded-image').parentNode;
+                const originalContent = uploadAreaOrImageContainer.innerHTML;
+                uploadAreaOrImageContainer.innerHTML = '<div class="loading"></div><p>در حال آپلود...</p>';
+
+                const response = await fetch('/api/blog/admin/upload-single-image', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    uploadedFiles.set(data.filename, {
+                        filename: data.filename,
+                        originalName: data.originalName,
+                        url: data.url
+                    });
+
+                    block.setAttribute('data-filename', data.filename);
+
+                    block.innerHTML = `
+                        <div class="block-controls">
+                            <button type="button" class="control-btn move-up" onclick="moveBlockUp(this)" title="انتقال به بالا">↑</button>
+                            <button type="button" class="control-btn move-down" onclick="moveBlockDown(this)" title="انتقال به پایین">↓</button>
+                            <button type="button" class="control-btn delete-block" onclick="deleteBlock(this)" title="حذف">✕</button>
+                        </div>
+                        <img src="${data.url}" alt="${data.originalName || 'تصویر آپلود شده'}" class="uploaded-image">
+                        <div class="image-info">
+                            <strong>فایل:</strong> ${data.filename}<br>
+                            <button type="button" class="btn btn-success" onclick="renameImage(this)">✏️ تغییر نام</button>
+                            <button type="button" class="btn btn-warning" onclick="changeImage(this)">🔄 تغییر عکس</button>
+                        </div>
+                        <input type="file" accept="image/*" style="display: none;" onchange="handleImageUpload(this)">
+                    `;
+
+                    updatePreview();
+                    showMessage('عکس با موفقیت آپلود شد', 'success');
+                } else {
+                    uploadAreaOrImageContainer.innerHTML = originalContent;
+                    showMessage(data.message || 'خطا در آپلود عکس', 'error');
+                }
+            } catch (error) {
+                console.error('خطا در آپلود عکس:', error);
+                const uploadAreaOrImageContainer = block.querySelector('.image-upload-area') || block.querySelector('.uploaded-image').parentNode;
+                if (uploadAreaOrImageContainer && uploadAreaOrImageContainer.innerHTML.includes('loading')) {
+                    uploadAreaOrImageContainer.innerHTML = `
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">📷</div>
+                        <p>کلیک کنید تا عکس انتخاب کنید</p>
+                        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+                            <button type="button" class="btn btn-success" onclick="selectImage(this.closest('.image-upload-area'))" style="padding: 8px 15px; font-size: 0.9rem;">📷 انتخاب عادی</button>
+                            <button type="button" class="btn btn-warning" onclick="selectImageWithCustomName(this.closest('.image-upload-area'))" style="padding: 8px 15px; font-size: 0.9rem;">✏️ انتخاب با نام دلخواه</button>
+                        </div>
+                        <input type="file" accept="image/*" style="display: none;" onchange="handleImageUpload(this)">
+                    `;
+                }
+                showMessage('خطا در آپلود عکس', 'error');
+            }
+        }
+
+
+        function moveBlockUp(button) {
+            const block = button.closest('.content-block');
+            const prevBlock = block.previousElementSibling;
+            if (prevBlock) {
+                block.parentNode.insertBefore(block, prevBlock);
+                updatePreview();
+            }
+        }
+
+        function moveBlockDown(button) {
+            const block = button.closest('.content-block');
+            const nextBlock = block.nextElementSibling;
+            if (nextBlock) {
+                block.parentNode.insertBefore(nextBlock, block);
+                updatePreview();
+            }
+        }
+
+        function deleteBlock(button) {
+            const block = button.closest('.content-block');
+            if (confirm('آیا از حذف این بلاک اطمینان دارید؟')) {
+                block.remove();
+                updatePreview();
+            }
+        }
+
+        function clearAll() {
+            if (confirm('آیا از پاک کردن تمام محتوا اطمینان دارید؟')) {
+                document.getElementById('contentBlocks').innerHTML = '';
+                uploadedFiles.clear(); // Clear uploaded files map
+                blockCounter = 0; // Reset block counter
+                addTextBlock();
+                updatePreview();
+            }
+        }
+
+        function generateContent() {
+            const blocks = document.querySelectorAll('.content-block');
+            let content = '';
+
+            blocks.forEach(block => {
+                const type = block.getAttribute('data-type');
+
+                if (type === 'text') {
+                    const textarea = block.querySelector('textarea');
+                    if (textarea && textarea.value.trim()) {
+                        content += textarea.value.trim() + '\n';
+                    }
+                } else if (type === 'image') {
+                    const filename = block.getAttribute('data-filename');
+                    if (filename && !(filename.startsWith('panorama_') && filename.match(/^panorama_\d+\.(jpg|jpeg|png|gif|webp)$/))) {
+                        content += `[IMAGE:${filename}]\n`;
+                    }
+                }
+            });
+
+            return content.trim();
+        }
+
+        function updatePreview() {
+            const blocks = document.querySelectorAll('.content-block');
+            let content = '';
+
+            blocks.forEach(block => {
+                const type = block.getAttribute('data-type');
+
+                if (type === 'text') {
+                    const textarea = block.querySelector('textarea');
+                    if (textarea && textarea.value.trim()) {
+                        content += textarea.value.trim() + '\n\n';
+                    }
+                } else if (type === 'image') {
+                    const filename = block.getAttribute('data-filename');
+                    if (filename) {
+                        // Add image markdown with proper styling
+                        content += `![تصویر](/api/blog/images/${filename})\n\n`;
+                    }
+                }
+            });
+
+            // Convert markdown to HTML
+            try {
+                let html = marked.parse(content);
+
+                // Style images properly in preview
+                html = html.replace(/<img\s+([^>]*?)>/g, (match, imgAttrs) => {
+                    return `<div style="text-align: center; margin: 2rem 0;">
+                        <img ${imgAttrs} style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    </div>`;
+                });
+
+                document.getElementById('finalPreview').innerHTML = html;
+
+                // Apply syntax highlighting
+                if (typeof Prism !== 'undefined') {
+                    Prism.highlightAllUnder(document.getElementById('finalPreview'));
+                }
+            } catch (error) {
+                console.error('خطا در تبدیل Markdown:', error);
+                document.getElementById('finalPreview').innerHTML = '<p style="color: #e74c3c;">خطا در نمایش پیش‌نمایش</p>';
+            }
+        }
+
+
+        // Auto-generate slug from title
+        document.getElementById('postTitle').addEventListener('input', (e) => {
+            if (!isEditMode) {
+                const slug = e.target.value
+                    .toLowerCase()
+                    .replace(/[^\u0600-\u06FF\w\s-]/g, '')
+                    .replace(/[\s_-]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+
+                document.getElementById('postSlug').value = slug;
+            }
+        });
+
+        // ذخیره مقاله
+        async function saveDraft() {
+            await savePost(false);
+        }
+
+        async function publishPost() {
+            await savePost(true);
+        }
+
+        async function savePost(publish = false) {
+            const postData = {
+                title: document.getElementById('postTitle').value,
+                slug: document.getElementById('postSlug').value,
+                category_id: document.getElementById('postCategory').value,
+                excerpt: document.getElementById('postExcerpt').value,
+                meta_description: document.getElementById('metaDescription').value,
+                meta_keywords: document.getElementById('metaKeywords').value,
+                content: generateContent(),
+                is_published: publish
+            };
+
+            // Save related posts separately after saving the main post
+            const shouldSaveRelated = currentPostId || (!currentPostId && (selectedRelatedPosts.readMore.length > 0 || selectedRelatedPosts.related.length > 0));
+
+            // اعتبارسنجی
+            if (!postData.title || !postData.slug || !postData.category_id) {
+                showMessage('لطفاً تمام فیلدهای الزامی را پر کنید', 'error');
+                return;
+            }
+
+            const saveBtn = publish ? document.getElementById('publishBtn') : document.getElementById('draftBtn');
+            const originalText = saveBtn.textContent;
+
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = publish ? '<div class="loading"></div> در حال انتشار...' : '<div class="loading"></div> در حال ذخیره...';
+
+            try {
+                const url = currentPostId 
+                    ? `/api/blog/admin/posts/${currentPostId}`
+                    : '/api/blog/admin/posts';
+
+                const method = currentPostId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(postData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const message = publish 
+                        ? 'مقاله با موفقیت منتشر شد' 
+                        : 'پیش‌نویس ذخیره شد';
+
+                    showMessage(message, 'success');
+
+                    if (!currentPostId && data.postId) {
+                        currentPostId = data.postId;
+                        document.getElementById('postId').value = currentPostId;
+                        window.history.replaceState({}, '', `/blog/admin/posts/edit/${currentPostId}`);
+                    }
+
+                    // Save related posts if needed
+                    if (shouldSaveRelated) {
+                        await saveRelatedPosts();
+                    }
+                } else {
+                    showMessage(data.message || 'خطا در ذخیره مقاله', 'error');
+                }
+            } catch (error) {
+                console.error('خطا در ذخیره مقاله:', error);
+                showMessage('خطا در اتصال به سرور', 'error');
+            }
+
+            saveBtn.disabled = false;
+            saveBtn.textContent = originalText;
+        }
+
+        async function saveRelatedPosts() {
+            if (!currentPostId) return;
+
+            try {
+                const relatedData = {
+                    readMore: selectedRelatedPosts.readMore.map(post => post.id),
+                    related: selectedRelatedPosts.related.map(post => post.id)
+                };
+
+                const response = await fetch(`/api/blog/admin/posts/${currentPostId}/related`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ relatedPosts: relatedData })
+                });
+
+                const data = await response.json();
+                if (!data.success) {
+                    console.error('خطا در ذخیره مقالات مرتبط:', data.message);
+                }
+            } catch (error) {
+                console.error('خطا در ذخیره مقالات مرتبط:', error);
+            }
+        }
+
+        // Related Posts Functions
+        async function loadAllPosts() {
+            try {
+                const response = await fetch('/api/blog/admin/posts');
+                const data = await response.json();
+
+                if (data.success) {
+                    allPosts = data.posts || [];
+                    displayPosts('readMore');
+                    displayPosts('related');
+                }
+            } catch (error) {
+                console.error('خطا در بارگیری مقالات:', error);
+            }
+        }
+
+        async function loadRelatedPosts(postId) {
+            try {
+                const response = await fetch(`/api/blog/admin/posts/${postId}/related`);
+                const data = await response.json();
+
+                if (data.success && data.relatedPosts) {
+                    selectedRelatedPosts = data.relatedPosts;
+                    updateSelectedPostsDisplay();
+                }
+            } catch (error) {
+                console.error('خطا در بارگیری مقالات مرتبط:', error);
+            }
+        }
+
+        function switchRelatedTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tab + 'Tab').classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.related-tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tab + 'Content').classList.add('active');
+        }
+
+        function displayPosts(type) {
+            const container = document.getElementById(type + 'PostsList');
+            const searchValue = document.getElementById(type + 'Search').value.toLowerCase();
+
+            let filteredPosts = allPosts;
+
+            // Filter out current post if editing
+            if (currentPostId) {
+                filteredPosts = filteredPosts.filter(post => post.id != currentPostId);
+            }
+
+            // Apply search filter
+            if (searchValue) {
+                filteredPosts = filteredPosts.filter(post => 
+                    post.title.toLowerCase().includes(searchValue) ||
+                    (post.category_name && post.category_name.toLowerCase().includes(searchValue))
+                );
+            }
+
+            container.innerHTML = filteredPosts.map(post => {
+                const isSelected = selectedRelatedPosts[type].some(selected => selected.id === post.id);
+
+                return `
+                    <div class="post-item ${isSelected ? 'selected' : ''}" onclick="togglePostSelection('${type}', ${post.id})">
+                        ${post.main_image ? 
+                            `<img src="/api/blog/images/${post.main_image}" alt="${post.title}">` :
+                            `<div class="post-item-placeholder">📄</div>`
+                        }
+                        <div class="post-item-content">
+                            <div class="post-item-title">${post.title}</div>
+                            <div class="post-item-meta">
+                                دسته‌بندی: ${post.category_name || 'بدون دسته‌بندی'} | 
+                                ${post.is_published ? 'منتشر شده' : 'پیش‌نویس'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function searchPosts(type) {
+            displayPosts(type);
+        }
+
+        function togglePostSelection(type, postId) {
+            const post = allPosts.find(p => p.id === postId);
+            if (!post) return;
+
+            const index = selectedRelatedPosts[type].findIndex(p => p.id === postId);
+
+            if (index > -1) {
+                // Remove from selection
+                selectedRelatedPosts[type].splice(index, 1);
+            } else {
+                // Add to selection
+                selectedRelatedPosts[type].push(post);
+            }
+
+            // Update displays
+            displayPosts(type);
+            updateSelectedPostsDisplay();
+        }
+
+        function removeSelectedPost(type, postId) {
+            const index = selectedRelatedPosts[type].findIndex(p => p.id === postId);
+            if (index > -1) {
+                selectedRelatedPosts[type].splice(index, 1);
+                displayPosts(type);
+                updateSelectedPostsDisplay();
+            }
+        }
+
+        function updateSelectedPostsDisplay() {
+            ['readMore', 'related'].forEach(type => {
+                const container = document.getElementById(type + 'Selected');
+
+                if (selectedRelatedPosts[type].length === 0) {
+                    container.innerHTML = '<p style="color: #666; text-align: center; padding: 2rem;">هیچ مقاله‌ای انتخاب نشده است</p>';
+                    return;
+                }
+
+                container.innerHTML = selectedRelatedPosts[type].map(post => `
+                    <div class="selected-post-item">
+                        <div class="selected-post-info">
+                            ${post.main_image ? 
+                                `<img src="/api/blog/images/${post.main_image}" alt="${post.title}">` :
+                                `<div class="selected-post-placeholder">📄</div>`
+                            }
+                            <div class="selected-post-title">${post.title}</div>
+                        </div>
+                        <button class="remove-selected-btn" onclick="removeSelectedPost('${type}', ${post.id})">
+                            حذف
+                        </button>
+                    </div>
+                `).join('');
+            });
+        }
+
+        function showMessage(message, type) {
+            const container = document.getElementById('messageContainer');
+            container.innerHTML = `<div class="message ${type}">${message}</div>`;
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 5000);
+        }
+
+        // راه‌اندازی اولیه
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+        });
+    </script>
+</body>
+</html>
