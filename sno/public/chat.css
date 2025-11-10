@@ -573,7 +573,7 @@ body {
 .input-actions {
   position: absolute;
   left: 8px;
-  bottom: 8px;
+  top: 8px;
   display: flex;
   gap: 6px;
   align-items: center;
@@ -1037,7 +1037,7 @@ body {
 
   .input-actions {
       left: 6px;
-      bottom: 6px;
+      top: 6px;
       gap: 5px;
   }
 

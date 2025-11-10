@@ -1,139 +1,268 @@
+
 /**
  * MessageRenderer - ماژول حرفه‌ای برای نمایش پیام‌های هوش مصنوعی
  * ویژگی‌ها: Markdown، Syntax Highlighting، Typewriter Effect، Copy Code، Math Formulas
+ * نسخه 2.0 - با معماری بهبود یافته برای جلوگیری از تداخل‌ها
  */
 
 class MessageRenderer {
     constructor() {
         this.setupStyles();
         this.initMarkdownParser();
-        this.mathDelimiters = [
-            { left: '$$', right: '$$', display: true },
-            { left: '\\[', right: '\\]', display: true },
-            { left: '$', right: '$', display: false },
-            { left: '\\(', right: '\\)', display: false }
-        ];
+        this.placeholderCounter = 0;
+    }
+
+    // تولید UUID یکتا برای placeholders
+    generateUUID() {
+        this.placeholderCounter++;
+        return `UUID_${Date.now()}_${this.placeholderCounter}_${Math.random().toString(36).substr(2, 9)}`;
     }
 
     initMarkdownParser() {
         this.simpleMarkdown = {
             parse: (text) => {
-                const placeholders = {
-                    code: [],
-                    math: []
+                // Storage برای نگهداری محتوای استخراج شده
+                const storage = {
+                    codeBlocks: new Map(),
+                    tables: new Map(),
+                    displayMath: new Map(),
+                    inlineMath: new Map()
                 };
 
                 let processedText = text;
 
-                // ذخیره فرمول‌های display با اولویت بالا
+                // **مرحله 1: استخراج Code Blocks (بالاترین اولویت)**
+                processedText = this.extractCodeBlocks(processedText, storage);
+
+                // **مرحله 2: استخراج Tables**
+                processedText = this.extractTables(processedText, storage);
+
+                // **مرحله 3: استخراج Display Math**
                 // $$...$$
                 processedText = processedText.replace(/\$\$([\s\S]+?)\$\$/g, (match, formula) => {
-                    const id = `ＭＡＴＨＤＩＳＰＬＡＹ${placeholders.math.length}ＥＮＤＭＡＴＨ`;
-                    placeholders.math.push({ 
-                        type: 'display', 
-                        content: formula.trim(),
-                        id: id
-                    });
-                    return id;
+                    const uuid = this.generateUUID();
+                    storage.displayMath.set(uuid, formula.trim());
+                    return uuid;
                 });
 
                 // \[...\]
                 processedText = processedText.replace(/\\\[([\s\S]+?)\\\]/g, (match, formula) => {
-                    const id = `ＭＡＴＨＤＩＳＰＬＡＹ${placeholders.math.length}ＥＮＤＭＡＴＨ`;
-                    placeholders.math.push({ 
-                        type: 'display', 
-                        content: formula.trim(),
-                        id: id
-                    });
-                    return id;
+                    const uuid = this.generateUUID();
+                    storage.displayMath.set(uuid, formula.trim());
+                    return uuid;
                 });
 
-                // ذخیره فرمول‌های inline
-                // \(...\) - باید قبل از $ ... $ پردازش شود
+                // **مرحله 4: استخراج Inline Math**
+                // \(...\)
                 processedText = processedText.replace(/\\\(([\s\S]+?)\\\)/g, (match, formula) => {
-                    const id = `ＭＡＴＨＩＮＬＩＮＥ${placeholders.math.length}ＥＮＤＭＡＴＨ`;
-                    placeholders.math.push({ 
-                        type: 'inline', 
-                        content: formula.trim(),
-                        id: id
-                    });
-                    return id;
+                    const uuid = this.generateUUID();
+                    storage.inlineMath.set(uuid, formula.trim());
+                    return uuid;
                 });
 
-                // $...$ با دقت بالا برای جلوگیری از تداخل
-                // Pattern جدید که فرمول‌های پیچیده‌تر را پشتیبانی می‌کند
+                // $...$ با دقت
                 processedText = processedText.replace(/\$([^\$\n]+?)\$/g, (match, formula) => {
-                    // بررسی اینکه دوتا $$ نیست
                     if (match.startsWith('$$') || match.endsWith('$$')) {
                         return match;
                     }
-                    
-                    // بررسی اینکه واقعاً فرمول است نه عدد معمولی
-                    // الگوهای معتبر: حروف، backslash، براکت‌ها، توان، زیرنویس
+
                     if (formula.match(/[a-zA-Z\\{}()[\]^_=+\-*\/]/)) {
-                        const id = `ＭＡＴＨＩＮＬＩＮＥ${placeholders.math.length}ＥＮＤＭＡＴＨ`;
-                        placeholders.math.push({ 
-                            type: 'inline', 
-                            content: formula.trim(),
-                            id: id
-                        });
-                        return id;
+                        const uuid = this.generateUUID();
+                        storage.inlineMath.set(uuid, formula.trim());
+                        return uuid;
                     }
                     return match;
                 });
 
-                // ذخیره code blocks
-                processedText = processedText.replace(/```([a-z]*)\n([\s\S]*?)```/gim, (match, lang, code) => {
-                    const id = `ＣＯＤＥＢＬＯＣＫ${placeholders.code.length}ＥＮＤＣＯＤＥ`;
-                    placeholders.code.push({ 
-                        lang: lang || 'text', 
-                        code: code,
-                        id: id
-                    });
-                    return id;
-                });
+                // **مرحله 5: پردازش Basic Markdown**
+                processedText = this.parseBasicMarkdown(processedText);
 
-                // پردازش Markdown
-                processedText = processedText
-                    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-                    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-                    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                    .replace(/`([^`]*)`/g, '<code>$1</code>')
-                    .replace(/\[([^\]]*)\]\(([^\)]*)\)/g, '<a href="$2" target="_blank">$1</a>')
-                    .replace(/\n/g, '<br>');
-
-                // بازگرداندن code blocks
-                placeholders.code.forEach((block) => {
-                    processedText = processedText.replace(
-                        block.id,
-                        `<pre><code class="language-${block.lang}">${this.escapeHtml(block.code)}</code></pre>`
-                    );
-                });
-
-                // بازگرداندن فرمول‌های ریاضی
-                placeholders.math.forEach((math) => {
-                    // برای data attribute از escapeHtml استفاده می‌کنیم
-                    // اما محتوای داخلی را خام نگه می‌داریم تا KaTeX بتواند آن را پردازش کند
-                    const escapedForAttr = this.escapeHtml(math.content);
-                    
-                    if (math.type === 'display') {
-                        processedText = processedText.replace(
-                            math.id,
-                            `<div class="katex-display-container" data-math="${escapedForAttr}"></div>`
-                        );
-                    } else {
-                        processedText = processedText.replace(
-                            math.id,
-                            `<span class="katex-inline-container" data-math="${escapedForAttr}"></span>`
-                        );
-                    }
-                });
+                // **مرحله 6: بازگرداندن همه placeholders**
+                processedText = this.restoreAllPlaceholders(processedText, storage);
 
                 return processedText;
             }
         };
+    }
+
+    extractCodeBlocks(text, storage) {
+        return text.replace(/```([a-z]*)\n([\s\S]*?)```/gim, (match, lang, code) => {
+            const uuid = this.generateUUID();
+            // Escape کامل محتوا قبل از ذخیره
+            storage.codeBlocks.set(uuid, {
+                lang: lang || 'text',
+                code: this.escapeHtml(code)
+            });
+            return uuid;
+        });
+    }
+
+    extractTables(text, storage) {
+        const tableRegex = /(\|.+\|(?:[\r\n]+|$))(\|[\s]*:?-+:?[\s]*(?:\|[\s]*:?-+:?[\s]*)+\|(?:[\r\n]+|$))((?:\|.+\|(?:[\r\n]+|$))*)/gm;
+
+        return text.replace(tableRegex, (match, header, separator, rows) => {
+            const uuid = this.generateUUID();
+
+            const alignments = this.parseTableAlignments(separator);
+            const columnCount = alignments.length;
+
+            const headerCells = this.parseTableRow(header);
+            while (headerCells.length < columnCount) {
+                headerCells.push('');
+            }
+
+            const bodyRows = rows
+                .split(/[\r\n]+/)
+                .map(row => row.trim())
+                .filter(row => row && row.startsWith('|'))
+                .map(row => {
+                    const cells = this.parseTableRow(row);
+                    while (cells.length < columnCount) {
+                        cells.push('');
+                    }
+                    return cells.slice(0, columnCount);
+                });
+
+            const tableHtml = this.buildTableHtml(headerCells.slice(0, columnCount), bodyRows, alignments);
+            storage.tables.set(uuid, tableHtml);
+
+            return uuid;
+        });
+    }
+
+    parseBasicMarkdown(text) {
+        return text
+            .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+            .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+            .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/`([^`]*)`/g, '<code>$1</code>')
+            .replace(/\[([^\]]*)\]\(([^\)]*)\)/g, '<a href="$2" target="_blank">$1</a>')
+            .replace(/\n/g, '<br>');
+    }
+
+    restoreAllPlaceholders(text, storage) {
+        let result = text;
+
+        // بازگرداندن Code Blocks
+        storage.codeBlocks.forEach((block, uuid) => {
+            const html = `<pre><code class="language-${block.lang}">${block.code}</code></pre>`;
+            result = result.replace(uuid, html);
+        });
+
+        // بازگرداندن Display Math
+        storage.displayMath.forEach((formula, uuid) => {
+            const escapedForAttr = this.escapeHtml(formula);
+            const html = `<div class="katex-display-container" data-math="${escapedForAttr}"></div>`;
+            result = result.replace(uuid, html);
+        });
+
+        // بازگرداندن Inline Math
+        storage.inlineMath.forEach((formula, uuid) => {
+            const escapedForAttr = this.escapeHtml(formula);
+            const html = `<span class="katex-inline-container" data-math="${escapedForAttr}"></span>`;
+            result = result.replace(uuid, html);
+        });
+
+        // بازگرداندن Tables
+        storage.tables.forEach((tableHtml, uuid) => {
+            result = result.replace(uuid, tableHtml);
+        });
+
+        return result;
+    }
+
+    parseTableAlignments(separator) {
+        let cleanSep = separator.trim();
+        if (cleanSep.startsWith('|')) cleanSep = cleanSep.substring(1);
+        if (cleanSep.endsWith('|')) cleanSep = cleanSep.substring(0, cleanSep.length - 1);
+        
+        return cleanSep.split('|')
+            .map(cell => cell.trim())
+            .filter(cell => cell.length > 0)
+            .map(cell => {
+                const trimmed = cell.trim();
+                if (trimmed.startsWith(':') && trimmed.endsWith(':')) return 'center';
+                if (trimmed.endsWith(':')) return 'right';
+                return 'left';
+            });
+    }
+
+    parseTableRow(row) {
+        let cleanRow = row.trim();
+        if (cleanRow.startsWith('|')) cleanRow = cleanRow.substring(1);
+        if (cleanRow.endsWith('|')) cleanRow = cleanRow.substring(0, cleanRow.length - 1);
+        
+        return cleanRow.split('|').map(cell => cell.trim());
+    }
+
+    buildTableHtml(headerCells, bodyRows, alignments) {
+        let html = '<div class="table-container"><table class="markdown-table">';
+
+        html += '<thead><tr>';
+        headerCells.forEach((cell, i) => {
+            const align = alignments[i] || 'left';
+            const content = cell.trim() ? this.parseInlineMarkdown(cell) : '&nbsp;';
+            html += `<th style="text-align: ${align}">${content}</th>`;
+        });
+        html += '</tr></thead>';
+
+        html += '<tbody>';
+        bodyRows.forEach((row, rowIndex) => {
+            html += `<tr class="${rowIndex % 2 === 0 ? 'even-row' : 'odd-row'}">`;
+            row.forEach((cell, i) => {
+                const align = alignments[i] || 'left';
+                const content = cell.trim() ? this.parseInlineMarkdown(cell) : '&nbsp;';
+                html += `<td style="text-align: ${align}">${content}</td>`;
+            });
+            html += '</tr>';
+        });
+        html += '</tbody>';
+
+        html += '</table></div>';
+        return html;
+    }
+
+    parseInlineMarkdown(text) {
+        const mathStorage = new Map();
+
+        // استخراج Math فقط برای جداول
+        let processedText = text.replace(/\$([^\$\n]+?)\$/g, (match, formula) => {
+            if (match.startsWith('$$') || match.endsWith('$$')) {
+                return match;
+            }
+            if (formula.match(/[a-zA-Z\\{}()[\]^_=+\-*\/]/)) {
+                const uuid = this.generateUUID();
+                mathStorage.set(uuid, formula.trim());
+                return uuid;
+            }
+            return match;
+        });
+
+        processedText = processedText.replace(/\\\(([^\)]+?)\\\)/g, (match, formula) => {
+            const uuid = this.generateUUID();
+            mathStorage.set(uuid, formula.trim());
+            return uuid;
+        });
+
+        // پردازش Markdown
+        processedText = processedText
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/`([^`]*)`/g, '<code>$1</code>')
+            .replace(/\[([^\]]*)\]\(([^\)]*)\)/g, '<a href="$2" target="_blank">$1</a>');
+
+        // بازگرداندن Math
+        mathStorage.forEach((formula, uuid) => {
+            const escapedForAttr = this.escapeHtml(formula);
+            processedText = processedText.replace(
+                uuid,
+                `<span class="katex-inline-container table-math" data-math="${escapedForAttr}"></span>`
+            );
+        });
+
+        return processedText;
     }
 
     setupStyles() {
@@ -250,7 +379,6 @@ class MessageRenderer {
                 color: #00d4ff;
             }
 
-            /* استایل‌های فرمول‌های ریاضی */
             .katex-display-container,
             .katex-inline-container {
                 color: #ff6b6b;
@@ -264,7 +392,7 @@ class MessageRenderer {
                 background: linear-gradient(135deg, #1a1a2e 0%, #2a2a3e 100%);
                 border: 2px solid rgba(0, 123, 255, 0.4);
                 border-radius: 12px;
-                box-shadow: 
+                box-shadow:
                     0 4px 15px rgba(0, 0, 0, 0.4),
                     inset 0 1px 0 rgba(255, 255, 255, 0.1);
                 text-align: center;
@@ -302,7 +430,7 @@ class MessageRenderer {
                 background: linear-gradient(135deg, #1a1a2e 0%, #2a2a3e 100%);
                 border: 2px solid rgba(0, 123, 255, 0.4);
                 border-radius: 8px;
-                box-shadow: 
+                box-shadow:
                     0 2px 8px rgba(0, 0, 0, 0.3),
                     inset 0 1px 0 rgba(255, 255, 255, 0.1);
                 position: relative;
@@ -359,7 +487,6 @@ class MessageRenderer {
                 border-bottom-color: #007BFF;
             }
 
-            /* نمایش خطا برای فرمول‌های رندر نشده */
             .katex-display-container:not(.rendered),
             .katex-inline-container:not(.rendered) {
                 background: rgba(255, 107, 107, 0.1);
@@ -370,6 +497,238 @@ class MessageRenderer {
                 direction: ltr;
                 font-family: 'Courier New', monospace;
                 font-size: 0.9em;
+            }
+
+            .message-content .table-container {
+                margin: 20px 0;
+                overflow-x: auto;
+                background: linear-gradient(135deg, #1a1a2e 0%, #2a2a3e 100%);
+                border: 2px solid rgba(0, 123, 255, 0.4);
+                border-radius: 12px;
+                box-shadow:
+                    0 4px 15px rgba(0, 0, 0, 0.4),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+                position: relative;
+                direction: ltr;
+                animation: tableSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .message-content .table-container::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, rgba(0, 123, 255, 0.05) 0%, rgba(0, 123, 255, 0.1) 100%);
+                border-radius: 10px;
+                pointer-events: none;
+            }
+
+            .message-content .markdown-table {
+                width: 100%;
+                border-collapse: separate;
+                border-spacing: 0;
+                position: relative;
+                z-index: 1;
+                font-family: 'Vazirmatn', sans-serif;
+            }
+
+            .message-content .markdown-table thead {
+                background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+                position: sticky;
+                top: 0;
+                z-index: 2;
+            }
+
+            .message-content .markdown-table th {
+                padding: 16px 20px;
+                font-weight: 700;
+                font-size: 0.95em;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: #00d4ff;
+                border-bottom: 3px solid rgba(0, 123, 255, 0.6);
+                white-space: nowrap;
+                background: linear-gradient(135deg, rgba(0, 123, 255, 0.15) 0%, rgba(0, 123, 255, 0.25) 100%);
+                text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+            }
+
+            .message-content .markdown-table th:first-child {
+                border-top-left-radius: 8px;
+            }
+
+            .message-content .markdown-table th:last-child {
+                border-top-right-radius: 8px;
+            }
+
+            .message-content .markdown-table td {
+                padding: 14px 20px;
+                color: #e5e5e5;
+                border-bottom: 1px solid rgba(0, 123, 255, 0.15);
+                line-height: 1.6;
+                transition: all 0.3s ease;
+            }
+
+            .message-content .markdown-table tbody tr {
+                transition: all 0.3s ease;
+            }
+
+            .message-content .markdown-table tbody tr.even-row {
+                background: rgba(0, 123, 255, 0.03);
+            }
+
+            .message-content .markdown-table tbody tr.odd-row {
+                background: rgba(0, 123, 255, 0.01);
+            }
+
+            .message-content .markdown-table tbody tr:hover {
+                background: rgba(0, 123, 255, 0.15);
+                transform: scale(1.01);
+                box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+            }
+
+            .message-content .markdown-table tbody tr:last-child td {
+                border-bottom: none;
+            }
+
+            .message-content .markdown-table tbody tr:last-child td:first-child {
+                border-bottom-left-radius: 8px;
+            }
+
+            .message-content .markdown-table tbody tr:last-child td:last-child {
+                border-bottom-right-radius: 8px;
+            }
+
+            .message-content .markdown-table code {
+                background: rgba(0, 123, 255, 0.2);
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 0.9em;
+                color: #00d4ff;
+                display: inline;
+                direction: ltr;
+                text-align: left;
+            }
+
+            .message-content .markdown-table .katex-inline-container.table-math {
+                display: inline;
+                margin: 0 4px;
+                padding: 4px 8px;
+                background: linear-gradient(135deg, #1a1a2e 0%, #2a2a3e 100%);
+                border: 1px solid rgba(0, 123, 255, 0.3);
+                border-radius: 6px;
+                box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+                position: relative;
+                direction: ltr;
+                text-align: center;
+                vertical-align: middle;
+            }
+
+            .message-content .markdown-table .katex-inline-container.table-math.rendered {
+                background: linear-gradient(135deg, #1a1a2e 0%, #2a2a3e 100%);
+            }
+
+            .message-content .markdown-table .katex-inline-container.table-math .katex {
+                color: #ffffff;
+                font-size: 1em;
+            }
+
+            .message-content .markdown-table a {
+                color: #007BFF;
+                text-decoration: none;
+                border-bottom: 1px solid transparent;
+                transition: all 0.3s ease;
+            }
+
+            .message-content .markdown-table a:hover {
+                border-bottom-color: #007BFF;
+                color: #00d4ff;
+            }
+
+            @media (max-width: 768px) {
+                .message-content .table-container {
+                    margin: 16px 0;
+                    border-radius: 8px;
+                }
+
+                .message-content .markdown-table th,
+                .message-content .markdown-table td {
+                    padding: 10px 12px;
+                    font-size: 0.9em;
+                }
+
+                .message-content .markdown-table th {
+                    font-size: 0.85em;
+                    letter-spacing: 0.5px;
+                }
+            }
+
+            @keyframes tableSlideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px) scale(0.95);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+            }
+
+            .message-content .table-container::-webkit-scrollbar {
+                height: 8px;
+            }
+
+            .message-content .table-container::-webkit-scrollbar-track {
+                background: rgba(0, 123, 255, 0.1);
+                border-radius: 4px;
+            }
+
+            .message-content .table-container::-webkit-scrollbar-thumb {
+                background: linear-gradient(90deg, rgba(0, 123, 255, 0.4) 0%, rgba(0, 123, 255, 0.6) 100%);
+                border-radius: 4px;
+                transition: all 0.3s ease;
+            }
+
+            .message-content .table-container::-webkit-scrollbar-thumb:hover {
+                background: linear-gradient(90deg, rgba(0, 123, 255, 0.6) 0%, rgba(0, 123, 255, 0.8) 100%);
+            }
+
+            .message-section {
+                padding: 16px 20px;
+                background: linear-gradient(135deg, #1f1f2e 0%, #2a2a3a 100%);
+                border: 1px solid rgba(0, 123, 255, 0.2);
+                border-radius: 16px;
+                border-bottom-left-radius: 4px;
+                border-bottom-right-radius: 16px;
+                margin-bottom: 12px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                animation: sectionSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .message-section:last-child {
+                margin-bottom: 0;
+            }
+
+            .message-sections-container {
+                display: flex;
+                flex-direction: column;
+                align-self: flex-end;
+                max-width: 95%;
+                margin-left: 2.5%;
+                margin-right: 2.5%;
+            }
+
+            @keyframes sectionSlideIn {
+                from {
+                    opacity: 0;
+                    transform: translateX(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
             }
         `;
         document.head.appendChild(style);
@@ -536,7 +895,6 @@ class MessageRenderer {
     }
 
     async renderMathFormulas(container) {
-        // چندین تلاش برای رندر فرمول‌ها
         const maxAttempts = 5;
         let attempt = 0;
 
@@ -575,16 +933,12 @@ class MessageRenderer {
                     }
                 };
 
-                // رندر فرمول‌های display
                 const displayContainers = container.querySelectorAll('.katex-display-container:not(.rendered)');
-                console.log(`Found ${displayContainers.length} display formula containers`);
-                
+
                 for (const displayContainer of displayContainers) {
                     const mathText = displayContainer.getAttribute('data-math') || displayContainer.textContent.trim();
                     if (!mathText) continue;
 
-                    console.log('Rendering display formula:', mathText);
-                    
                     try {
                         displayContainer.innerHTML = '';
                         katex.render(mathText, displayContainer, {
@@ -593,9 +947,8 @@ class MessageRenderer {
                         });
                         displayContainer.classList.add('rendered');
                         displayContainer.classList.add('katex-display');
-                        console.log('Successfully rendered display formula');
                     } catch (error) {
-                        console.error('خطا در رندر فرمول display:', error.message, 'Formula:', mathText);
+                        console.error('خطا در رندر فرمول display:', error.message);
                         displayContainer.innerHTML = `<div style="color: #ff6b6b; font-size: 12px; padding: 8px;">
                             خطا در رندر فرمول: <code style="display: block; margin-top: 4px; direction: ltr;">${this.escapeHtml(mathText)}</code>
                             <br><small>${error.message}</small>
@@ -603,16 +956,12 @@ class MessageRenderer {
                     }
                 }
 
-                // رندر فرمول‌های inline
                 const inlineContainers = container.querySelectorAll('.katex-inline-container:not(.rendered)');
-                console.log(`Found ${inlineContainers.length} inline formula containers`);
-                
+
                 for (const inlineContainer of inlineContainers) {
                     const mathText = inlineContainer.getAttribute('data-math') || inlineContainer.textContent.trim();
                     if (!mathText) continue;
 
-                    console.log('Rendering inline formula:', mathText);
-                    
                     try {
                         inlineContainer.innerHTML = '';
                         katex.render(mathText, inlineContainer, {
@@ -621,9 +970,8 @@ class MessageRenderer {
                         });
                         inlineContainer.classList.add('rendered');
                         inlineContainer.classList.add('katex-inline');
-                        console.log('Successfully rendered inline formula');
                     } catch (error) {
-                        console.error('خطا در رندر فرمول inline:', error.message, 'Formula:', mathText);
+                        console.error('خطا در رندر فرمول inline:', error.message);
                         inlineContainer.innerHTML = `<code style="color: #ff6b6b; background: rgba(255, 107, 107, 0.1); padding: 4px 8px; border-radius: 4px; direction: ltr;">${this.escapeHtml(mathText)}<br><small>${error.message}</small></code>`;
                     }
                 }
@@ -633,7 +981,6 @@ class MessageRenderer {
             }
         };
 
-        // شروع رندر با تأخیر کوتاه
         await new Promise(resolve => setTimeout(resolve, 100));
         await tryRender();
     }

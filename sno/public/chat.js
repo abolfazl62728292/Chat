@@ -435,10 +435,10 @@ class SNOChat {
             // بررسی محدودیت پیام
             this.checkMessageLimit();
 
-            // برای پیام‌های تاریخی، فوری به پایین اسکرول کن
-            setTimeout(() => {
-                this.scrollToBottom();
-            }, 100);
+            // برای پیام‌های تاریخی، بعد از رندر کامل، به آخرین پیام اسکرول کن (بدون انیمیشن)
+            requestAnimationFrame(() => {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            });
 
         } catch (error) {
             console.error('خطا در نمایش پیام‌ها:', error);
@@ -551,11 +551,6 @@ class SNOChat {
                 // بررسی محدودیت
                 this.checkMessageLimit();
 
-                // Force scroll to bottom after AI response
-                setTimeout(() => {
-                    this.scrollToBottom();
-                }, 100);
-
                 // Update credits
                 this.userCredits = data.remainingCredits;
                 this.updateCreditsDisplay();
@@ -621,77 +616,99 @@ class SNOChat {
                 emptyChat.style.display = 'none';
             }
 
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${senderType}`;
-
-            // Add image if provided (برای کاربر فقط) - نمایش تصویر در بالای پیام
-            if (imageUrl && senderType === 'user') {
-                const imageContainer = document.createElement('div');
-                imageContainer.className = 'message-image-container';
-                
-                const imageElement = document.createElement('img');
-                imageElement.src = imageUrl;
-                
-                // اگر پیام متنی همراه عکس داریم، عکس را کوچک و مربعی نمایش بده
-                // اگر فقط عکس داریم (بدون متن)، بزرگتر نمایش بده
-                if (stringContent && stringContent !== '[تصویر ارسالی]') {
-                    imageElement.className = 'message-image message-image-small';
-                } else {
-                    imageElement.className = 'message-image message-image-large';
-                }
-                
-                imageElement.alt = 'تصویر ارسالی';
-                imageElement.style.cursor = 'pointer';
-                
-                // اضافه کردن event listener برای باز کردن modal
-                imageElement.addEventListener('click', () => {
-                    this.openImageModal(imageUrl);
-                });
-                
-                imageContainer.appendChild(imageElement);
-                messageDiv.appendChild(imageContainer);
-            }
-
             // Use the validated string content
             const safeContent = stringContent.substring(0, 5000); // Limit message length
 
-            // فقط اگر متن داریم، اضافه کن
-            if (safeContent) {
-                // استفاده از MessageRenderer برای نمایش پیام‌ها
-                if (this.messageRenderer) {
-                    // برای پیام‌های کاربر: نمایش فوری
-                    if (senderType === 'user') {
-                        await this.messageRenderer.renderInstant(safeContent, messageDiv);
-                    } 
-                    // برای پیام‌های هوش مصنوعی: 
-                    else if (senderType === 'assistant') {
-                        // اگر پیام تاریخی است (بارگذاری از قبل)، بدون انیمیشن نمایش بده
-                        if (isHistorical) {
-                            await this.messageRenderer.renderInstant(safeContent, messageDiv);
-                        } else {
-                            // فقط برای پیام‌های جدید تایپ‌رایتر اجرا کن
-                            await this.messageRenderer.renderWithTypewriter(safeContent, messageDiv, 3);
-                        }
+            // بررسی وجود --- برای جداسازی بخش‌ها در پیام‌های AI
+            if (senderType === 'assistant' && safeContent && safeContent.includes('---')) {
+                await this.renderSectionedMessage(safeContent, messagesContainer, typingIndicator, isHistorical);
+            } else {
+                // رندر پیام معمولی (بدون جداسازی)
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${senderType}`;
+                
+                // فقط برای پیام‌های جدید AI انیمیشن ورود اضافه کن
+                if (!isHistorical && senderType === 'assistant') {
+                    messageDiv.style.opacity = '0';
+                    messageDiv.style.transform = 'translateY(20px)';
+                }
+
+                // Add image if provided (برای کاربر فقط) - نمایش تصویر در بالای پیام
+                if (imageUrl && senderType === 'user') {
+                    const imageContainer = document.createElement('div');
+                    imageContainer.className = 'message-image-container';
+                    
+                    const imageElement = document.createElement('img');
+                    imageElement.src = imageUrl;
+                    
+                    // اگر پیام متنی همراه عکس داریم، عکس را کوچک و مربعی نمایش بده
+                    // اگر فقط عکس داریم (بدون متن)، بزرگتر نمایش بده
+                    if (stringContent && stringContent !== '[تصویر ارسالی]') {
+                        imageElement.className = 'message-image message-image-small';
+                    } else {
+                        imageElement.className = 'message-image message-image-large';
                     }
+                    
+                    imageElement.alt = 'تصویر ارسالی';
+                    imageElement.style.cursor = 'pointer';
+                    
+                    // اضافه کردن event listener برای باز کردن modal
+                    imageElement.addEventListener('click', () => {
+                        this.openImageModal(imageUrl);
+                    });
+                    
+                    imageContainer.appendChild(imageElement);
+                    messageDiv.appendChild(imageContainer);
+                }
+
+                // فقط اگر متن داریم، اضافه کن
+                if (safeContent) {
+                    // استفاده از MessageRenderer برای نمایش پیام‌ها
+                    if (this.messageRenderer) {
+                        // برای پیام‌های کاربر: نمایش فوری
+                        if (senderType === 'user') {
+                            await this.messageRenderer.renderInstant(safeContent, messageDiv);
+                        } 
+                        // برای پیام‌های هوش مصنوعی: 
+                        else if (senderType === 'assistant') {
+                            // اگر پیام تاریخی است (بارگذاری از قبل)، بدون انیمیشن نمایش بده
+                            if (isHistorical) {
+                                await this.messageRenderer.renderInstant(safeContent, messageDiv);
+                            } else {
+                                // برای پیام‌های جدید تایپ‌رایتر کندتر اجرا کن (6ms به جای 3ms)
+                                await this.messageRenderer.renderWithTypewriter(safeContent, messageDiv, 6);
+                            }
+                        }
+                    } else {
+                        // پشتیبانی برای حالت بدون MessageRenderer
+                        const contentDiv = document.createElement('div');
+                        contentDiv.textContent = safeContent;
+                        messageDiv.appendChild(contentDiv);
+                    }
+                }
+
+                // Safely insert before typing indicator
+                if (typingIndicator && typingIndicator.parentNode === messagesContainer) {
+                    messagesContainer.insertBefore(messageDiv, typingIndicator);
                 } else {
-                    // پشتیبانی برای حالت بدون MessageRenderer
-                    const contentDiv = document.createElement('div');
-                    contentDiv.textContent = safeContent;
-                    messageDiv.appendChild(contentDiv);
+                    messagesContainer.appendChild(messageDiv);
+                }
+
+                // فقط برای پیام‌های جدید AI انیمیشن ورود اجرا کن
+                if (!isHistorical && senderType === 'assistant') {
+                    // اجرای انیمیشن ورود
+                    requestAnimationFrame(() => {
+                        messageDiv.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                        messageDiv.style.opacity = '1';
+                        messageDiv.style.transform = 'translateY(0)';
+                    });
+
+                    // اسکرول smooth به پیام جدید
+                    setTimeout(() => {
+                        this.smoothScrollToMessage(messageDiv);
+                    }, 100);
                 }
             }
-
-            // Safely insert before typing indicator
-            if (typingIndicator && typingIndicator.parentNode === messagesContainer) {
-                messagesContainer.insertBefore(messageDiv, typingIndicator);
-            } else {
-                messagesContainer.appendChild(messageDiv);
-            }
-            
-            // Force scroll after DOM update
-            setTimeout(() => {
-                this.scrollToBottom();
-            }, 100);
 
         } catch (error) {
             console.error('خطا در افزودن پیام به رابط کاربری:', error);
@@ -703,6 +720,81 @@ class SNOChat {
             const messagesContainer = document.getElementById('messagesContainer');
             if (messagesContainer) {
                 messagesContainer.appendChild(messageDiv);
+            }
+        }
+    }
+
+    async renderSectionedMessage(content, messagesContainer, typingIndicator, isHistorical) {
+        // استخراج code blocks قبل از split کردن
+        const codeBlockStorage = [];
+        let processedContent = content;
+
+        // جایگزینی موقت code blocks با placeholder های یکتا
+        processedContent = processedContent.replace(/```[\s\S]*?```/g, (match) => {
+            const uuid = `CODEBLOCKSEPARATOR_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            codeBlockStorage.push({ uuid, content: match });
+            return uuid;
+        });
+
+        // حالا می‌توانیم بر اساس --- تقسیم کنیم بدون نگرانی از code blocks
+        const sections = processedContent.split(/^---+$/m).map(s => s.trim()).filter(s => s);
+
+        // بازگرداندن code blocks به sections
+        const restoredSections = sections.map(section => {
+            let restored = section;
+            codeBlockStorage.forEach(({ uuid, content }) => {
+                restored = restored.replace(uuid, content);
+            });
+            return restored;
+        });
+
+        // رندر هر بخش در یک باکس جداگانه با انیمیشن مستقل
+        for (let i = 0; i < restoredSections.length; i++) {
+            const section = restoredSections[i];
+            const sectionDiv = document.createElement('div');
+            sectionDiv.className = 'message assistant';
+            
+            // فقط برای پیام‌های جدید انیمیشن ورود اضافه کن
+            if (!isHistorical) {
+                sectionDiv.style.opacity = '0';
+                sectionDiv.style.transform = 'translateY(20px)';
+            }
+
+            if (this.messageRenderer) {
+                if (isHistorical) {
+                    // پیام‌های تاریخی بدون انیمیشن
+                    await this.messageRenderer.renderInstant(section, sectionDiv);
+                } else {
+                    // برای پیام‌های جدید، تایپ‌رایتر کندتر (6ms) با تاخیر بین بخش‌ها
+                    if (i > 0) {
+                        await new Promise(resolve => setTimeout(resolve, 200));
+                    }
+                    await this.messageRenderer.renderWithTypewriter(section, sectionDiv, 6);
+                }
+            } else {
+                sectionDiv.textContent = section;
+            }
+
+            // اضافه کردن هر بخش به messagesContainer
+            if (typingIndicator && typingIndicator.parentNode === messagesContainer) {
+                messagesContainer.insertBefore(sectionDiv, typingIndicator);
+            } else {
+                messagesContainer.appendChild(sectionDiv);
+            }
+
+            // فقط برای پیام‌های جدید انیمیشن ورود اجرا کن
+            if (!isHistorical) {
+                // انیمیشن ورود هر بخش به صورت مستقل
+                requestAnimationFrame(() => {
+                    sectionDiv.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                    sectionDiv.style.opacity = '1';
+                    sectionDiv.style.transform = 'translateY(0)';
+                });
+
+                // اسکرول smooth به بخش جدید با تاخیر کمتر
+                setTimeout(() => {
+                    this.smoothScrollToMessage(sectionDiv);
+                }, 100);
             }
         }
     }
@@ -781,6 +873,21 @@ class SNOChat {
 
     hideCreditsWarning() {
         document.getElementById('creditsWarning').style.display = 'none';
+    }
+
+    smoothScrollToMessage(messageElement) {
+        try {
+            if (!messageElement) return;
+            
+            // اسکرول smooth به پیام جدید
+            messageElement.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',
+                inline: 'nearest'
+            });
+        } catch (error) {
+            console.error('خطا در اسکرول به پیام:', error);
+        }
     }
 
     scrollToBottom() {
