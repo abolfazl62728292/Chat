@@ -45,39 +45,53 @@ class GeminiModule {
         }
 
         try {
-            const model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' });
-            
-            // Create the prompt with system instruction and conversation history
             const systemInstruction = `اسمت : GPT 5 که توسط openAI آموزش دیدی
 فعالیت : دستیار هوشمند فارسی که در پلتفرم اسنو‌چت(SnoChat) فعالیت میکنی.
 تا ازت نپرسیده شده اسمت و فعالیتت رو نگو.
 اگر کاربر محاوره ای حرف زد تو ام محاوره ای و دوستانه حرف بزن.
-دقت بکن بر اساس سابقه چت و مکالماتی که با کاربر داشتی حرف بزن.مثلا چندین بار سلام نکن یا 'وسط مکالمه بعد چند پیام دوباره سلام بکنی'.
+دقت بکن بر اساس سابقه چت و مکالماتی که با کاربر داشتی حرف بزنی.'
 تو باید با دقت بالا به سوالات کاربر ها پاسخ بدی.
 درصورتی که کاربر گفت توضیح بده تو توضیحات کامل رو میدی ولی در محدوده تعیین شده ،چون هدف اصلی توضیح کوتاه و متمرکز هستش بدون حاشیه.
 حداکثر کلمات پاسخ(کدهای زبان برنامه نویسی) = 800 کلمه
 دقت بکن اگر قرار بود ریاضیاتی حل بکنی یا هرچیز حل کردنی که فرمول داشت باید از علائم مناسب برای نمایش فرمول به کاربر استفاده بکنی تا توی فرانت اند به شکل درست و قابل فهم نمایش داده بشه به کاربر.
 توجه : دقت بکن که تو خروجیت محدود هستش پس اگر خیلی طولانی شد توضیحاتت باید به کاربر بگی که توی پیام بعدیت ادامه اشو میگی تا هیچوقت وسط حرف زدنت متن نصفه نباشه.
 
-نکته مهم درباره تصاویر: وقتی کاربر تصویر می‌فرستد، محتوای تصویر به صورت متن معادل (که توسط سیستم استخراج شده) در پیام کاربر با فرمت [تصویر ارسالی - متن معادل: ...] نمایش داده می‌شود. این متن معادل می‌تواند شامل فرمول‌های ریاضی، کدهای برنامه‌نویسی، متن‌های موجود در تصویر یا توصیف محتوای تصویر باشد. تو باید بر اساس این متن معادل با کاربر صحبت کنی و در پاسخت به محتوای تصویر اشاره کنی.`;
+نکته مهم درباره تصاویر: وقتی کاربر تصویر می‌فرستد، محتوای تصویر به صورت متن معادل (که توسط سیستم استخراج شده) در پیام کاربر با فرمت [تصویر ارسالی - متن معادل: ...] نمایش داده می‌شود. این متن معادل می‌تواند شامل فرمول‌های ریاضی، کدهای برنامه‌نویسی، متن‌های موجود در تصویر یا توصیف محتوای تصویر باشد. تو باید بر اساس این متن معادل با کاربر صحبت کنی و در پاسخت به محتوای تصویر اشاره کنی.دقت بکن که تنها این ساختار برای تصاویر ورودی کاربر هستش و تو خودت نمیتونی با این تصویری بسازی.
+اگر کاربر برای درک بهتر به شکل نیازداشت برای سوالاتش تو اجازه داری در قالب کد شکل رو ترسیم بکنی با علامت هایی مثل * و - و ... که لازم داری و در این شرایط بهتره از نوشتن متن داخل قالب پرهیز بکنی تا کاربر شکل دقیق رو ببینه و توضیحات رو بیرون از قالب کد ارايه بده.
+
+با --- میتونی پیام هایی که میدی رو برای حالت نمایش به کاربر اینطوری بکنی که انگار چند پیام جدا دادی مثل یک چت واقعی ولی باید درست ازش استفاده بکنی
+
+برای درک بهتر اگر لازم شد با جدول به کاربر راهنمایی بده ولی دقت بکن باید طول متن در خونه های جدول نباید طولانی باشه چون موقع نمایش تجربه کاربری بد میشه. `;
             
-            // Format conversation for Gemini API
-            let prompt = systemInstruction + '\n\n';
+            const model = this.genAI.getGenerativeModel({ 
+                model: 'gemini-2.5-flash-lite',
+                systemInstruction: systemInstruction
+            });
             
-            // Add conversation history
-            if (Array.isArray(conversationHistory)) {
-                for (const msg of conversationHistory) {
-                    if (msg && msg.role && msg.parts && Array.isArray(msg.parts) && msg.parts[0] && msg.parts[0].text) {
-                        if (msg.role === 'user') {
-                            prompt += `کاربر: ${msg.parts[0].text}\n`;
-                        } else if (msg.role === 'model') {
-                            prompt += `دستیار: ${msg.parts[0].text}\n`;
-                        }
-                    }
-                }
+            // Validate conversation history format
+            if (!Array.isArray(conversationHistory)) {
+                throw new Error('فرمت سابقه چت نامعتبر است');
             }
-            
-            const result = await model.generateContent(prompt);
+
+            // Filter out the last user message (new message) to send separately
+            const history = conversationHistory.slice(0, -1);
+            const newMessage = conversationHistory[conversationHistory.length - 1];
+
+            if (!newMessage || newMessage.role !== 'user') {
+                throw new Error('پیام جدید کاربر یافت نشد');
+            }
+
+            // Start chat session with history
+            const chat = model.startChat({
+                history: history,
+                generationConfig: {
+                    maxOutputTokens: 2048,
+                    temperature: 0.7,
+                }
+            });
+
+            // Send the new message
+            const result = await chat.sendMessage(newMessage.parts[0].text);
             const response = await result.response;
             const text = response.text();
 
@@ -85,7 +99,7 @@ class GeminiModule {
                 throw new Error('پاسخ نامعتبر از سرویس هوش مصنوعی');
             }
 
-             return text;
+            return text;
 
         } catch (error) {
             console.error('خطا در دریافت پاسخ از Gemini:', error);

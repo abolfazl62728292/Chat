@@ -240,10 +240,25 @@ class SnoControllers {
             });
 
             // Prepare conversation context for AI
-            const conversationHistory = messages.map(msg => ({
-                role: msg.sender_type === 'user' ? 'user' : 'model',
-                parts: [{ text: msg.content }]
-            }));
+            const conversationHistory = messages.map(msg => {
+                let messageContent = msg.content;
+                
+                // اگر پیام کاربر دارای تصویر است، اطلاعات تصویر را به محتوا اضافه کن
+                if (msg.sender_type === 'user' && msg.image_description) {
+                    if (msg.content && msg.content.trim() !== '' && msg.content !== '[تصویر ارسالی]') {
+                        // هم تصویر و هم متن داریم
+                        messageContent = `[تصویر ارسالی - متن معادل: ${msg.image_description}]\n\nپیام کاربر: ${msg.content}`;
+                    } else {
+                        // فقط تصویر داریم
+                        messageContent = `[تصویر ارسالی - متن معادل: ${msg.image_description}]`;
+                    }
+                }
+                
+                return {
+                    role: msg.sender_type === 'user' ? 'user' : 'model',
+                    parts: [{ text: messageContent }]
+                };
+            });
             
             // Add the new user message (with image description for AI context)
             conversationHistory.push({
