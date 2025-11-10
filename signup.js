@@ -2,6 +2,7 @@
 const DatabaseModule = require('./database');
 const SecurityModule = require('./security');
 const PlansModule = require('./plans');
+const verifyModule = require('./verify');
 
 class SignupModule {
     
@@ -51,13 +52,22 @@ class SignupModule {
             const verificationCode = SecurityModule.generateVerificationCode();
 
             // Save to database
-            DatabaseModule.createOrUpdateUser(normalizedPhone, verificationCode, (err) => {
+            DatabaseModule.createOrUpdateUser(normalizedPhone, verificationCode, async (err) => {
                 if (err) {
                     return res.status(500).json({ success: false, message: 'خطای ذخیره‌سازی' });
                 }
 
-                // In production, send SMS here
                 console.log(`Verification code for ${normalizedPhone}: ${verificationCode}`);
+
+                const smsResult = await verifyModule.sendVerificationSMS(normalizedPhone, verificationCode);
+                
+                if (smsResult.success) {
+                    console.log('✅ SMS sent successfully via SMS.ir');
+                } else if (smsResult.fallback) {
+                    console.log('⚠️  SMS sending failed, code shown in console (fallback mode)');
+                } else {
+                    console.log('❌ SMS sending failed without fallback');
+                }
 
                 res.json({ 
                     success: true, 

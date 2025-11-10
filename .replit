@@ -1,0 +1,121 @@
+modules = ["nodejs-20", "python-3.11", "postgresql-16"]
+[agent]
+expertMode = true
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Web Server"
+
+[[workflows.workflow]]
+name = "Web Server"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node index.js"
+waitForPort = 5000
+
+[[workflows.workflow]]
+name = "Node Server"
+author = 47248428
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm install"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node index.js"
+
+[[workflows.workflow]]
+name = "Run"
+author = 47264390
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node index.js"
+
+[[ports]]
+localPort = 3000
+externalPort = 3000
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 8000
+externalPort = 8000
+
+[[ports]]
+localPort = 33273
+externalPort = 3001
+
+[[ports]]
+localPort = 33771
+externalPort = 9000
+
+[[ports]]
+localPort = 34619
+externalPort = 5000
+
+[[ports]]
+localPort = 34699
+externalPort = 4200
+
+[[ports]]
+localPort = 35181
+externalPort = 5173
+
+[[ports]]
+localPort = 37681
+externalPort = 6000
+
+[[ports]]
+localPort = 37709
+externalPort = 8081
+
+[[ports]]
+localPort = 38555
+externalPort = 6800
+
+[[ports]]
+localPort = 40191
+externalPort = 8080
+
+[[ports]]
+localPort = 40517
+externalPort = 3003
+
+[[ports]]
+localPort = 43089
+externalPort = 8099
+
+[[ports]]
+localPort = 44425
+externalPort = 3002
+
+[[ports]]
+localPort = 45733
+externalPort = 8008
+
+[nix]
+channel = "stable-25_05"
+packages = ["sqlite"]
+
+[deployment]
+deploymentTarget = "vm"
+run = ["node", "index.js"]
